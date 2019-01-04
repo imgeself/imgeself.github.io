@@ -1,0 +1,15 @@
+---
+layout: post
+title: "Prologue"
+date: "2018-12-28 22:47:47 +0300"
+---
+
+Hello there. I'm starting a blog with the new year. I'm building projects for improving my software and math
+skills. Recently it's a ray tracer. I think make blog posts about these projects is a good idea.
+Blog posts are really cool because it's a playground for expressing your ideas into the text and
+also good English practicing area, especially for non-native English language people.
+
+I used Jekyll and GitHub pages for this page and it's a bit of a pain in the ass.
+Far more redundant work from just creating Wordpress page and start writing.
+But it is faster for the reader actually. So, I am sticking to it for now.
+Let's see where it goes.
