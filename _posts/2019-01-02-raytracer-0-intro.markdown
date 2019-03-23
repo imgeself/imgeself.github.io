@@ -6,16 +6,16 @@ date: "2019-01-02 23:16:27 +0300"
 
 I started to develop raytracer using C++ for satisfying my computer graphics hungriness. In the beginning, I'm thinking to try Rust but I went with C++. Maybe in the future, I could port the program to rust.  
 
-You can find source code in [here.](https://github.com/imgeself/raytracer/tree/baba952f46f980c8ff1295f594b20bef437d82a2)
+You can find source code in [here.](https://github.com/imgeself/raytracer/tree/baba952f46f980c8ff1295f594b20bef437d82a2){:target="_blank"}
 
 The main references for this raytracer are:
 
- - [Handmade Ray](https://hero.handmade.network/episode/ray/) (Raytracing extension of Handmade Hero)
- - [Peter Shirley's ray tracing books](https://github.com/petershirley)
- - [Aras's amazing blog posts](http://aras-p.info/blog/2018/03/28/Daily-Pathtracer-Part-0-Intro/)
- - [Scratchapixel](https://www.scratchapixel.com/index.php)
+ - [Handmade Ray](https://hero.handmade.network/episode/ray/){:target="_blank"} (Raytracing extension of Handmade Hero)
+ - [Peter Shirley's ray tracing books](https://github.com/petershirley){:target="_blank"}
+ - [Aras's amazing blog posts](http://aras-p.info/blog/2018/03/28/Daily-Pathtracer-Part-0-Intro/){:target="_blank"}
+ - [Scratchapixel](https://www.scratchapixel.com/index.php){:target="_blank"}
 
-First off, I write [BMP](https://en.wikipedia.org/wiki/BMP_file_format) image writer and math, vector utils. Then I write sphere, plane, world, light structures. Basic geometry we need to trace. Then just wrote basic intersection code. Most raytracer tutorials start teaching using global illumination and there is a good reason for that. The power of raytracing is creating a photorealistic image using global illumination in relatively small code. But I started using direct illumination from my small OpenGL-rendering experiences to understand the core concept.
+First off, I write [BMP](https://en.wikipedia.org/wiki/BMP_file_format){:target="_blank"} image writer and math, vector utils. Then I write sphere, plane, world, light structures. Basic geometry we need to trace. Then just wrote basic intersection code. Most raytracer tutorials start teaching using global illumination and there is a good reason for that. The power of raytracing is creating a photorealistic image using global illumination in relatively small code. But I started using direct illumination from my small OpenGL-rendering experiences to understand the core concept.
 
 ![Diffuse Lighting](/assets/img/diffuse.bmp)
 

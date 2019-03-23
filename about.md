@@ -4,5 +4,5 @@ title: About
 permalink: /about/
 ---
 
-Hi! I am Huseyin. I am an engineer who interested in computer graphics, games
+Hi! I am Huseyin. I am 21 years old engineer who interested in computer graphics, games
 and game engines. And this is my about page.

@@ -17,7 +17,7 @@ struct Material {
 };
 ```
 
-Core `RaytraceWord` [function](https://github.com/imgeself/raytracer/blob/master/main.cpp#L72)
+Core `RaytraceWord` [function](https://github.com/imgeself/raytracer/blob/master/main.cpp#L72){:target="_blank"}
 is changed for the new material types. And it's now work like this:
 ```c++
 // Main ray trace function.
@@ -85,7 +85,7 @@ for (sampleSize) {
  pixelColor = (color / sampleSize);
 ```
 
-> Note: Sampling is actually an advanced topic in rendering. And there is a tradeoff between sampling and performance. Increasing sample size make the image look cool but it slows the program's execution time. What I did here is a very basic way of sampling. Maybe we implement more clear sampling techniques like [importance sampling](https://en.wikipedia.org/wiki/Importance_sampling) in the future.
+> Note: Sampling is actually an advanced topic in rendering. And there is a tradeoff between sampling and performance. Increasing sample size make the image look cool but it slows the program's execution time. What I did here is a very basic way of sampling. Maybe we implement more clear sampling techniques like [importance sampling](https://en.wikipedia.org/wiki/Importance_sampling){:target="_blank"} in the future.
 
 When we run our code in 512 sample per pixel, we get this nice, smooth image.
 
