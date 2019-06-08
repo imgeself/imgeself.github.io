@@ -120,7 +120,7 @@ Instead of incrementing hundreds of per work order, we going to do once.
 After implementing this change we get 2.3x speedup. See the commit [here](https://github.com/imgeself/raytracer/commit/ba3fe88926c3036bc616a3e238fa721c03f9ad86){:target="_blank"}.
 
 ## Performance
-Let's look at how much speed we gain from speeds. Here's the speed chart:
+Let's look at how much speed we gain from threads:
 
 ![Chart](/assets/img/speed-graph.png)
 

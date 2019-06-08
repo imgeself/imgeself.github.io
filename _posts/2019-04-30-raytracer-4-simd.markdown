@@ -34,7 +34,7 @@ The problem is: How we are gonna modify our code to get performance benefits of 
 ## IntersectWorldWide
 In the ```IntersectWorld``` function, we test every ray for if it has collision to scene objects.
 We have 1 plane in our scene, so that should be remain scalar. Most of the work is doing
-on sphere intersection checking. Since we have more than 1 spheres, we could try to check multi spheres at once.
+on sphere intersection checking. Since we have more than 1 spheres, we could try to check multiple spheres at once.
 
 For that, we need to store spheres into more SIMD friendly shape. We need to put members
 into arrays. [SoA (Structure of Arrays)](https://software.intel.com/en-us/articles/memory-layout-transformations){:target="_blank"}
@@ -168,7 +168,7 @@ inline LaneF32 FMulAdd(const LaneF32 left, const LaneF32 right, const LaneF32 ad
 #ifdef __FMA__
     result.m = _mm256_fmadd_ps(left.m, right.m, addend.m);
 #else
-    result.m = (left.m * right.m) + addend.m;
+    result = (left * right) + addend;
 #endif
 
     return result;
