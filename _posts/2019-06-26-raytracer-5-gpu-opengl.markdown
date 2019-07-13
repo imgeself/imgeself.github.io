@@ -166,7 +166,7 @@ There is one caught my eye which says "Long Running Execution". So decreased the
 So the problem was something called [Timeout Detection & Recovery](https://docs.microsoft.com/en-us/windows-hardware/drivers/display/timeout-detection-and-recovery){:target="_blank"}.
 If you use %100 of dedicated GPU period of time (default 2 sec), Windows is going to reset the GPU. That is what happened to me.
 
-# "Progressive Sampling"
+# "Progressive Rendering"
 All production raytracers behave like: it generates a very poor sampled image and it improves the image by continuing to sampling as the program runs.
 I wanted to add this feature. So the idea is that we add a new image to the averaged image in every frame. 
 ```c++

@@ -4,11 +4,11 @@ title: "Raytracer 1: Little More Advanced Shading"
 date: "2019-02-19 22:13:28 +0300"
 ---
 
-Last post, I made a ray tracer with very basic direct illumination code. It was good
+Last post, I built a ray tracer with very basic direct illumination code. It was good
 but we need go further for more fun. So it's time to implement some other material types.
 
 ## Diffuse, Lambertian, Dielectric
-For the new materials, I added new variables to the material struct:
+For the new materials, I added new variables to the material struct for reflective and refractive materials:
 ```c++
 struct Material {
     float refractiveIndex; // Refractive index of material. 0 means no refraction.
@@ -55,10 +55,9 @@ Vector3 RaytraceWorld(World* world, Ray* ray) {
 }
 ```
 
-When trying to implement new materials, I end up getting weird rendering artifacts
-along the way. Just looking for them, tracing the ray transport for why the
-artifacts happen, is amazingly fun and informative. Deep diving the math
-equations and looking derivations of them, also fun and informative.
+> When trying to implement new materials, I end up getting weird rendering artifacts
+along the way. Just looking at them and debugging the ray transport for why the
+artifacts happen, is amazingly fun and informative.
 
 When we run this code we get this interesting image.
 

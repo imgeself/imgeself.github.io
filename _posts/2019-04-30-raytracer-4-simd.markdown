@@ -24,9 +24,9 @@ you add elements of a float array to another float array then get a float array 
 
 ![SIMD](https://cdn-images-1.medium.com/max/1600/1*uiYS-VhMxoUm9EKMNTMwgQ.jpeg)
 
-This image (which take from [here](https://medium.com/@bromanz/simd-sse-unity3d-net-2-0-70f6c911713f){:target="_blank"})
-clearly shows what's happening. Left side we use single float type and make 4 additions to
-get results that we want. Right side tow 4-length arrays adding in single add operations
+This image (which taken from [here](https://medium.com/@bromanz/simd-sse-unity3d-net-2-0-70f6c911713f){:target="_blank"})
+clearly shows what's happening. On the left, we use single float type and make 4 additions to
+get results that we want. On the right, 4-length arrays adding in single add operations
 and we get all result in 4-length array.
 
 The problem is: How we are gonna modify our code to get performance benefits of SIMD?
