@@ -75,7 +75,7 @@ if (dot > 0) {
 
 ![Correct Rectangle](/assets/img/correct-rectangle.png)
 
-That looks more correct image. [(commit)](https://github.com/imgeself/raytracer/commit/676beb36211049ed845664a54705bfbc51407cbb).
+That looks more correct image.
 Now we can apply all types of material types to the rectangle.
 Here is a rectangle with emissive material applied:
 
