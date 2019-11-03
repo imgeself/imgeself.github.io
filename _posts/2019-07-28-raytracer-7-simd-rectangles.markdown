@@ -119,7 +119,7 @@ for (uint32_t rectangleLaneIndex = 0; rectangleLaneIndex < world->rectangleLaneA
 }
 ```
 
-It's almost the same code but we used masks for if-else branches. Here are the performance numbers are:
+It's almost the same code but we used masks for if-else branches. Here are the performance numbers:
  - with SSE4.1 **0.00017 ms/ray**
  - with AVX2 **0.00011 ms/ray**
 
