@@ -23,7 +23,7 @@ github_username:  imgeself
 
 # Build settings
 markdown: kramdown
-theme: minima
+theme: jekyll-theme-dinky
 plugins:
   - jekyll-feed
 
