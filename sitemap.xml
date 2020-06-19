@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://imgeself.github.io/</loc>
+    <lastmod>2020-06-19T19:15:51+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/</loc>
+    <lastmod>2020-06-19T19:15:51+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/</loc>
+    <lastmod>2020-06-19T19:15:51+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2019-07-28-raytracer-7-simd-rectangles/</loc>
+    <lastmod>2019-07-26T15:15:51+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2019-07-20-raytracer-6-rectangles-cornell/</loc>
+    <lastmod>2019-07-23T17:30:51+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/</loc>
+    <lastmod>2019-06-26T17:29:51+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/</loc>
+    <lastmod>2019-04-30T17:29:51+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2019-03-23-raytracer-3-multithreading/</loc>
+    <lastmod>2019-03-23T16:32:32+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2019-02-26-raytracer-2-custom-random-function/</loc>
+    <lastmod>2019-02-26T20:42:39+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2019-02-19-raytracer-1-little-more-advanced-shading/</loc>
+    <lastmod>2019-02-19T22:13:28+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/posts/2019-01-02-raytracer-0-intro/</loc>
+    <lastmod>2019-01-02T23:16:27+03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/about/</loc>
+  </url>
+  
+  <url>
+    <loc>https://imgeself.github.io/tags/</loc>
+  </url>
+  
+</urlset>

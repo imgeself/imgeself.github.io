@@ -1,0 +1,1586 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Posts on Dear World,</title>
+        <link>https://imgeself.github.io/posts/</link>
+        <description>Recent content in Posts on Dear World,</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Fri, 19 Jun 2020 19:15:51 +0300</lastBuildDate>
+        <atom:link href="https://imgeself.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Studying rendering of Red Dead Redemption 2</title>
+            <link>https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/</link>
+            <pubDate>Fri, 19 Jun 2020 19:15:51 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/</guid>
+            <description>One of my favorite games of all time, Red Dead Redemption returned with a prequel for consoles in 2018. Then it came for PCs in 2019. I finally managed to play the game and amazed by its graphics immediately. But I got upset because I can barely play the game on medium settings at 25 FPS with a 1050Ti laptop GPU. I know that I don&#39;t have a good rig but 25 FPS on medium settings?</description>
+            <content type="html"><![CDATA[
+
+<p>One of my favorite games of all time, <a href="https://en.wikipedia.org/wiki/Red_Dead_Redemption" target="_blank">Red Dead Redemption</a>
+returned with a <a href="https://en.wikipedia.org/wiki/Red_Dead_Redemption_2" target="_blank">prequel</a> for consoles in 2018. Then it came for PCs in 2019.
+I finally managed to play the game and amazed by its graphics immediately.
+But I got upset because I can barely play the game on medium settings at 25 FPS with a 1050Ti laptop GPU.
+I know that I don't have a good rig but 25 FPS on medium settings?</p>
+
+<p>Today, we are going to look at some frame captures from the game and try to analyze graphics techniques used in the game.</p>
+
+<h2 id="foreword">Foreword</h2>
+
+<p>This isn't an official breakdown of the game. It just me analyzing <a href="https://renderdoc.org/" target="_blank">RenderDoc</a> frame captures.
+If you want to learn from the actual developers,
+you can check the slides from a SIGGRAPH talk by <a href="https://twitter.com/globbbe" target="_blank">Fabian Bauer</a>.
+<a href="https://advances.realtimerendering.com/s2019/index.htm" target="_blank">Slides</a> (At the bottom of the page), <a href="https://dl.acm.org/doi/10.1145/3305366.3335036" target="_blank">Video</a> (starts at 1:58:00)</p>
+
+<p>You can also read a graphics analysis of GTA5 by Adrian Courrèges <a href="https://www.adriancourreges.com/blog/2015/11/02/gta-v-graphics-study/" target="_blank">here</a>.
+Since both RDR2 and GTA5 are from the same company and uses the same engine, some of the techniques from GTA5 present here as well.</p>
+
+<p>Another important thing is that, I am not a senior graphics programmer or anything like that.
+I am still a junior in this field.
+So, there will be plenty of things that I don't understand. If you find any mistakes or things that can be improved, please reach out to me. Here we go!</p>
+
+<h2 id="dissecting-a-frame">Dissecting a frame</h2>
+
+<p>Here is the main frame for dissecting:</p>
+
+<p><img src="/img/mainframe.jpg" alt="MainFrame" />
+<em>Captured on PC, medium settings.</em></p>
+
+<blockquote>
+<p>When it comes to a game like RDR2, it's almost impossible to see all the techniques in one frame.
+It amortizes its work across multiple frames.
+Because of that, I captured more than a single frame but this is the main one we are going to be focusing on.
+It contains a lot of properties like; spot and point lights, directional light (it's very subtle but it's there), buildings, NPCs, a horse, trees, vegetation, clouds, etc. It should demonstrate most of the rendering techniques used in the game.</p>
+</blockquote>
+
+<p>RDR2 is an open-world game that streams data constantly. Because of that, the frame starts with a bunch of tasks like creating and deleting textures, shader resource views, unordered access views, updating descriptors, buffers, etc.</p>
+
+<h3 id="mud-map">Mud map</h3>
+
+<p>Mud plays a big role in the game. Beside being a game mechanic, it makes envrionments more realistic. The game renders footprint textures of humans and horses into a displacement map along with trail textures of horse wagon wheels. This accumulated texture is used for <a href="https://developer.amd.com/wordpress/media/2012/10/Tatarchuk-POM.pdf" target="_blank">Parallax Occlusion Mapping</a> when rendering terrain.</p>
+
+<p><img src="/img/mudmap.png" alt="MudMap" />
+<em>Mud map: 2048x2048 <code>R16_UNORM</code></em></p>
+
+<h3 id="sky-and-clouds">Sky and clouds</h3>
+
+<p>After the mud pass, the game does a lot of work on GPU compute. Most of them related to sky and clouds.
+Clouds, fog, and volumetrics are RDR2's prominent effects.
+You can find more information about this stage on Fabian's slides. He explains in far more detail than I could ever explain.</p>
+
+<h3 id="environment-map">Environment map</h3>
+
+<p>Environment maps are the main source of reflections in RDR2 as well as GTA5.
+<a href="http://www.adriancourreges.com/blog/2015/11/02/gta-v-graphics-study/#environment-cubemap" target="_blank">Like the GTA5</a>, RDR2 generates an environment cubemap from the camera position.
+It generates a thin GBuffer for the envrionment map, similar to <a href="https://www.youtube.com/watch?v=rD6KcxcCl_8" target="_blank">Far Cry 4</a>.</p>
+
+<p><img src="/img/envalbedo.jpg" alt="EnvironmentMapAlbedo" />
+<em>Environment Cubemap Faces (Albedo): <code>RGBA8_SRGB</code></em></p>
+
+<p><img src="/img/envnormal.jpg" alt="EnvironmentMapNormal" />
+<em>Environment Cubemap Faces (Normal): <code>RGBA8_UNORM</code></em></p>
+
+<p><img src="/img/envdepth.jpg" alt="EnvironmentMapDepth" />
+<em>Environment Cubemap Faces (Depth): <code>D32S8</code></em></p>
+
+<p>Environment cubemap generation in every frame can be a heavy task. RDR2 does some optimizations to reduce the cost.
+For example, the game only draws static and opaque objects, does <a href="https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/frustum-culling-r4613/" target="_blank">frustum culling</a> before rendering each face, and draws lower LOD versions of models.
+Although, I've found that poly count of the terrain is still very high for environment maps.</p>
+
+<p>After the G-Buffer pass, a sky environment cubemap is generated using a sky paraboloid map and cloud-related textures.
+The next step is convolution. RDR2 uses <a href="https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf" target="_blank">split sum approximation</a> for Image Based Lighting.
+That method uses a pre-filtered environment cubemap along with an environment BRDF LUT.
+For filtering, the game convolutes an environment cubemap and stores convoluted versions in the cubemap's mipmap levels.</p>
+
+<p>Before executing a lighting pass for the environment cubemap, RDR2 renders baked large-scale ambient occlusion into another cubemap texture.
+The game uses screen space ambient occlusion but SSAO can help you on a small scale.
+Baked ambient occlusion helps to darken on a large scale such as darkening in patios and interiors.</p>
+
+<p><img src="/img/envao.jpg" alt="EnvironmentMapBakedAO" />
+<em>Environment Cubemap Faces (Baked AO): <code>R8_UNORM</code></em></p>
+
+<p>Even though the game generates a GBuffer, it doesn't render lights the same way as classic <a href="https://en.wikipedia.org/wiki/Deferred_shading" target="_blank">deferred rendering</a>.
+The lighting is done in one single compute pass instead of rendering every light's volume.
+So it's more like a forward rendering without shadows.
+The game also uses the &quot;top-down world lightmap&quot; technique, <a href="https://www.gdcvault.com/play/1017710/Rendering-Assassin-s-Creed" target="_blank">similar to Assassin's Creed III</a>, for baked lighting.</p>
+
+<p>For each cubemap face, RDR2 renders the final color on top of the sky environment texture.
+Then it filters the environment cubemap same as the sky environment cubemap.</p>
+
+<p><img src="/img/envfinal.jpg" alt="EnvironmentMapFinal" />
+<em>Environment Cubemap Faces (Final): <code>R11G11B10_FLOAT</code></em></p>
+
+<p>RDR2 also loads envrionment maps that located in building interiors when the player is near a building.
+These are also cubemap G-Buffers streamed from the disk.</p>
+
+<p><img src="/img/bakedenvalbedo.jpg" alt="BakedEnvironmentMapAlbedo" />
+<em>Baked Environment Cubemap Faces (Albedo): <code>BC3_SRGB</code> (Baked AO stored in alpha channel)</em></p>
+
+<p><img src="/img/bakedenvnormal.jpg" alt="BakedEnvironmentMapNormal" />
+<em>Baked Environment Cubemap Faces (Normal): <code>BC3_UNORM</code></em></p>
+
+<p><img src="/img/bakedenvdepth.jpg" alt="BakedEnvironmentMapDepth" />
+<em>Baked Environment Cubemap Faces (Depth): <code>R16_UNORM</code></em></p>
+
+<p>The game calculates the lighting of these maps and filters them like the previous ones.
+It only calculates one baked environment map at a time and only recalculates them when the time of day changes.
+All of the environment maps are stored in a texture cubemap array. There isn't any <a href="http://www.adriancourreges.com/blog/2015/11/02/gta-v-graphics-study/#cubemap-to-dual-paraboloid-map" target="_blank">cubemap to dual-paraboloid map conversion</a>.</p>
+
+<h3 id="g-buffer-pass">G-Buffer Pass</h3>
+
+<p>This stage starts with terrain depth prepass and then the game renders scene into G-Buffers.</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 0 <code>RGB</code></th>
+<th align="center">GBuffer 0 <code>A</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/albedo.jpg" alt="AlbedoTarget" /></td>
+<td align="center"><img src="/img/albedoa.jpg" alt="AlbedoTargetA" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RGBA8_SRGB</code> - This buffer contains albedo(base color) in RGB channels. I'm not sure what the alpha channel data is for but it's used on anti-aliasing stage.
+<br/><br/></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 1 <code>RGB</code></th>
+<th align="center">GBuffer 1 <code>A</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/normal.jpg" alt="NormalTarget" /></td>
+<td align="center"><img src="/img/normala.jpg" alt="NormalTargetA" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RGBA8_UNORM</code>: The RGB channels contain normals and the alpha channel contains something related to cloth and hair.
+<br/><br/></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 2 <code>RGB</code></th>
+<th align="center">GBuffer 2 <code>A</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/material.jpg" alt="MaterialTarget" /></td>
+<td align="center"><img src="/img/materiala.jpg" alt="MaterialTargetA" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RGBA8_UNORM</code>: This target is for material properties.
+
+<ul>
+<li>R: Reflectance(f0)</li>
+<li>G: Smoothness</li>
+<li>B: Metallic</li>
+<li>A: Contains some shadowing (this channel will be used as a shadow mask at later stages)
+<br/><br/></li>
+</ul></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 3 <code>R</code></th>
+<th align="center">GBuffer 3 <code>B</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/cavity.jpg" alt="Material2TargetR" /></td>
+<td align="center"><img src="/img/cavityb.jpg" alt="Material2TargetB" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RGBA8_UNORM</code>: The red channel contains cavity. There is another mystery data in the blue channel. And hair related data in the alpha channel. I can't find anything on the green channel.
+<br/><br/></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 4 <code>RG</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/motionblur.jpg" alt="MotionBlurTarget" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RG16_FLOAT</code>: This buffer contains screen space velocity for motion blur.
+<br/><br/></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 5 <code>Depth</code></th>
+<th align="center">GBuffer 5 <code>Stencil</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/depth.jpg" alt="DepthTarget" /></td>
+<td align="center"><img src="/img/stencil.jpg" alt="StencilTarget" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>D32S8</code>: Like the GTA5, RDR2 is also using <a href="https://developer.nvidia.com/content/depth-precision-visualized" target="_blank">reversed-z</a> for depth and using the stencil buffer to assign certain values to certain group of meshes.
+<br/><br/></li>
+</ul>
+
+<p>There is another target is generated from baked data:</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 6 <code>R</code></th>
+<th align="center">GBuffer 6 <code>G</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/gitarget.jpg" alt="BakedAO" /></td>
+<td align="center"><img src="/img/gitargetg.jpg" alt="MysteryTarget" /></td>
+</tr>
+</tbody>
+</table>
+
+<p>This buffer contains baked ambient occlusion in the red channel, the same as in the environment map stage.
+But there are other channels in this texture. The green channel contains some data that looks like the data in GBuffer 3's blue channel.
+Again, I don't know what is this data used for. And I can't find any data in blue and alpha channels on my captures. I will investigate this further.</p>
+
+<h3 id="shadow-map-generation">Shadow Map Generation</h3>
+
+<p>After the G-Buffer stage, the game starts to render shadow maps.
+It uses 2D texture arrays for point light shadow maps and texture cube arrays for point light shadow maps.</p>
+
+<p>Some games use big shadow atlas texture for shadow maps (<a href="http://advances.realtimerendering.com/s2016/Siggraph2016_idTech6.pdf" target="_blank">e.g DOOM</a>).
+One of the advantages of that method is shadow map size can vary based on distance.
+When you use texture arrays, you lose that flexibility because all of the textures in texture arrays must be the same size.
+RDR2 has 3 different texture arrays for different quality.
+For example, spotlights have:</p>
+
+<ul>
+<li><strong>512x768 D16</strong> for distant lights</li>
+<li><strong>1024x1536 D16</strong> for medium distance(and closer distance on medium setting) lights</li>
+<li><strong>2048x3072 D16</strong> for closer lights (on high/ultra settings)</li>
+</ul>
+
+<p>Point lights cast shadows in all directions. To deal with that problem, games use a technique called <a href="https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows" target="_blank">Omnidirectional Shadow Mapping</a>
+where you render the scene into a depth cubemap from the camera position. Campfire shadows and shadows from Arthur's lantern are rendered using this technique.
+Point light shadows have 3 different arrays for different quality settings same as spotlights.</p>
+
+<p>Most of the static point lights in the game have baked shadow cubemaps.
+So, the game uses baked shadows whenever it can and only generates shadow maps when the player is near a light-volume.
+But things get more interesting than that.</p>
+
+<p>Most of the lights on walls are spotlights but the game doesn't generate an omnidirectional shadow map for them.
+Instead, it generates a spotlight shadow map and copies that shadow map's memory into pointlight shadow map cube array.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="right"></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><img  width="512" height="768" src="/img/spotshadow.jpg"></td>
+<td align="right"><img width="128" height="768" src="/img/pointshadow.jpg"></td>
+</tr>
+</tbody>
+</table>
+
+<p><em>Left image is a 1024x1536 spotlight shadow map, right image is the same image data in 512x512 texture cube format</em></p>
+
+<blockquote>
+<p>Note that local light shadow maps stores linear z.</p>
+</blockquote>
+
+<p>That explains why they are not using a square sized shadow map for spotlights.
+Pixel count for spotlight shadow and point light texture cubemap should be the same.
+I am sure that you noticed some weird slice pattern in the right image.
+That happens because the width of spot and point light shadow map is different.</p>
+
+<p>Also note that this texture doesn't cover 360 degrees.
+But luckily, lights on buildings generally have a wall on their backside and baked shadow maps cover it.</p>
+
+<p>Another interesting thing is that this process is vice-versa.
+For example, in Saint Denis -one of the biggest cities in the game- the game generates omnidirectional shadow maps for spotlights
+and copies that data into spotlight shadow map array.
+I don't know why RDR2 doing shadow mapping like this. I couldn't find any similar technique on the internet.</p>
+
+<p>Directional light shadow mapping in RDR2 is pretty much the <a href="http://www.adriancourreges.com/blog/2015/11/02/gta-v-graphics-study/#shadows" target="_blank">same as in GTA5</a>. <a href="https://docs.microsoft.com/en-us/windows/win32/dxtecharts/cascaded-shadow-maps" target="_blank">Cascaded Shadow Mapping</a> with 4 cascades.
+Each 1024x1024 tile of the 1024x4096(medium settings) texture atlas used as a cascade.</p>
+
+<p><img src="/img/shadowcascades.jpg" alt="ShadowCascades" />
+<em>Directional Light Shadow Atlas: <code>R16_UNORM</code></em></p>
+
+<h3 id="lighting-stage">Lighting Stage</h3>
+
+<p>It's finally time to combine all of these environment maps, gbuffers, shadow maps, ao buffers.</p>
+
+<p>This stage contains two passes: The first one is for global light(sun/moon) and the second one is for local lights.</p>
+
+<h4 id="global-light-pass">Global light pass</h4>
+
+<p>The game renders a fullscreen quad for calculating directional lighting which is moonlight in this case.
+There is some baked lighting from the &quot;top-down world lightmap&quot; mentioned previously.</p>
+
+<p><img src="/img/lightpass1.jpg" alt="LightPass1" /></p>
+
+<h4 id="local-light-pass">Local light pass</h4>
+
+<p>In this pass, the game renders a low-poly sphere shape for point light volumes and octahedron like shape for spotlight volumes.
+Lights are rendered back-to-front with additive blending.</p>
+
+<p>For avoiding unnecessary shader invokes, the game uses depth bound testing which is an <a href="https://www.geeks3d.com/20130523/amd-gcn-performance-tweets-and-depth-bounds-test-dx11-demo-published/" target="_blank">extension feature</a> in OpenGL/D3D11 but becomed <a href="https://microsoft.github.io/DirectX-Specs/d3d/DepthBoundsTest.html" target="_blank">native feature</a> in Vulkan/D3D12.
+It also uses stencil testing for discarding pixels that consumed by translucent objects like glasses in windows.
+Those objects will be rendered at the forward pass.</p>
+
+<p><img src="/img/lightpass2.jpg" alt="LightPass2" /></p>
+
+<h3 id="water-rendering-and-reflections">Water rendering and reflections</h3>
+
+<p>I won't be covering water rendering in this post because it deserves a special blog post.
+But I want to talk a little bit about reflections:</p>
+
+<ul>
+<li>Like previously mentioned, environment maps are the main source of reflections. For general reflections like window reflections, the game uses them.</li>
+<li>Mirrors, on the other hand, are rendered with planar reflections where you render the scene again from the direction of the reflection. This process is handled with deferred rendering also.</li>
+<li>Water reflections use screen space reflections combined with the environment map that generated at the beginning of the frame.</li>
+</ul>
+
+<h3 id="forward-shading-stage">Forward shading stage</h3>
+
+<p>One of the disadvantages of deferred rendering pipeline is that you can't render translucent materials with GBuffers correctly.
+To solve that, the game renders translucent materials back to front with forward shading like most of the games that using deferred rendering.</p>
+
+<p>But this forward pass can be expensive because:</p>
+
+<ul>
+<li>It uses forward shading shaders which are more expensive than deferred ones.</li>
+</ul>
+
+<blockquote>
+<p>The number of registers used in a shader correlates with the number of shader instances that can be run in parallel.
+Since forward shading combines material and lighting(and shadow) calculations, the number of registers will be high in forward shaders</p>
+</blockquote>
+
+<ul>
+<li>It draws every thick translucent object twice.</li>
+</ul>
+
+<blockquote>
+<p>To achieve correct blending, you have to render back faces of an object first and render its front faces second.
+Because of that, most of the translucent objects in this stage are being drawn twice.
+2D-quad-like objects(like windows) are rendered once.</p>
+</blockquote>
+
+<ul>
+<li>And there is a pipeline state change between every draw.</li>
+</ul>
+
+<blockquote>
+<p>To be able to switch between front face and back face culling, you have to change pipeline states. And those changes can be expensive.</p>
+</blockquote>
+
+<p>There is another render target generated in this stage for the bloom effect.
+This target stores the intensity of bloom.
+As you can see in the picture, translucent objects glow more.</p>
+
+<p><img src="/img/bloommask.jpg" alt="BloomMask" />
+<em>Bloom intensity target: <code>R8_UNORM</code></em></p>
+
+<blockquote>
+<p>Note that the bloom intensity increases at far distances to get more glow in foggy areas.</p>
+</blockquote>
+
+<h3 id="post-processing">Post processing</h3>
+
+<p>This is the stage where temporal antialiasing, bloom, motion blur, depth of field, and other effects are executed.
+I am planning for another blog post just for post processing.
+So, I won't talk about much in here but I want to talk a little bit about the bloom.
+There is already glow of lights on the main render target thanks to volumetric lighting.</p>
+
+<p>RDR2 bloom implementation is very similar to the implementation described in <a href="https://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare" target="_blank">Next Generation Post Processing in Call of Duty: Advanced Warfare</a>.</p>
+
+<ul>
+<li>Non-thresholded target as input,</li>
+<li><code>R11G11B10_FLOAT</code> 7-mip render target,</li>
+<li>13-bilinear-tap filter on downsampling, 3x3 tent filter on upscaling.</li>
+</ul>
+
+<p>Then the game combines this filtered bloom target with the main target along with the bloom intensity target.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>What a quite ride! There is so much more to talk about but I don't want this blog to be too long.
+I'd like to share my conclusions about all of this and some odd things that I've found along the way.</p>
+
+<ul>
+<li>The first thing I noticed is that this game does a lot of compute to graphics switches and vice versa.
+It uses async compute if you enable. (You can't enable async compute on in-game settings. You have to enable it from the game's config file)
+For example, just for bloom effect; the game switches to compute and does some work, then switches back to graphics and does downsampling,
+then switches back to compute for some other work and switches back to graphics again for upsampling. Aren't these &quot;switches&quot; expensive on GPUs?
+Does the gain from compute justify the cost of switches?</li>
+<li>Another thing is that RDR2 clears most of the textures. This is strange because games generally avoid unnecessary texture clears(e.g. clearing GBuffers).
+Do these &quot;texture clears&quot; have a real impact on performance? Do they need to clear these textures?</li>
+<li>Another odd thing is that; There are 3 (maybe more) same depth downsample pass in one frame. One for SSAO, another for SSR, and another for volumetric fog and light shaft generation stage. Why the game doesn't use the downsampled depth target from SSAO for other stages?</li>
+</ul>
+
+<p>Don't get me wrong, I don't blame anyone here (Well... I'm little upset about low framerates),
+I'm trying to understand why these decisions were made.
+After all, lots of talented people <a href="https://kotaku.com/inside-rockstar-games-culture-of-crunch-1829936466" target="_blank">crunched hard</a> on this game.
+It is likely that they didn't have enough time to optimize the game further.</p>
+
+<h2 id="last-words">Last words</h2>
+
+<p>Well, that's it! RDR2 is a gorgeous game to look at. Not just for graphics techniques but the art, the lighting, everything looks phenomenal.
+I've fallen love with the color palette of this game.
+Especially at night times, it reminds me of The Assassination of Jesse James by the Coward Robert Ford, No Country for Old Men, and other western movies that shot with 35mm cameras.</p>
+
+<p>If you find anything that is wrong or can be improved, please feel free to contact me.
+I will update this article when I got more information. Please, comment, share and enjoy.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Raytracer 7: SIMD Rectangles</title>
+            <link>https://imgeself.github.io/posts/2019-07-28-raytracer-7-simd-rectangles/</link>
+            <pubDate>Fri, 26 Jul 2019 15:15:51 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2019-07-28-raytracer-7-simd-rectangles/</guid>
+            <description>In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers: - Previous scene with 8 spheres: 0.00009 ms/ray - Cornell Box: 0.00132 ms/ray
+We need to optimize rectangle intersection testing.
+Don&#39;t do anything more than you need to do I hinted this in the last post. We have to get rid of matrix inverse function in the IntersectWorld function because it&#39;s too heavy.</description>
+            <content type="html"><![CDATA[
+
+<p>In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now.
+Let's look at some numbers:
+ - Previous scene with 8 spheres: <strong>0.00009 ms/ray</strong>
+ - Cornell Box: <strong>0.00132 ms/ray</strong></p>
+
+<p>We need to optimize rectangle intersection testing.</p>
+
+<h2 id="don-t-do-anything-more-than-you-need-to-do">Don't do anything more than you need to do</h2>
+
+<p>I hinted this in the <a href="https://imgeself.github.io/2019/07/23/raytracer-6-rectangles-cornell.html" target="_blank">last post</a>.
+We have to get rid of matrix inverse function in the <code>IntersectWorld</code> function because it's too heavy.
+And guess what, we never need a non-inverted transform matrix in the intersection.
+So we can invert all rectangle's transform matrices in scene initialization and put an inverted matrix in the rectangle data.
+That is a pretty easy task to do. After this change, we get <strong>0.000036 ms/ray</strong>. That is a huge boost up.</p>
+
+<h2 id="simd-rectangles">SIMD Rectangles</h2>
+
+<p>We managed to test the intersection between a ray and multiple spheres with SIMD in the last posts.
+If you haven’t read the <a href="https://imgeself.github.io/2019/04/30/raytracer-4-simd.html" target="_blank">previous SIMD post</a>,
+I encourage you to read it. Because this post gonna be the second part of that.</p>
+
+<p>Okay, the idea is still the same: SIMD is not a computation problem. It simply is a memory layout problem. As long as our memory layouts are okay,
+the intersecton code will stay almost the same. Like the last time, we are thinking parallel.
+We have wide Vector3 struct that each element is a SIMD register and we used <a href="https://software.intel.com/en-us/articles/memory-layout-transformations" target="_blank">the AoSoA layout</a> structure to map our sphere data.
+Rectangle struct has a Matrix4 type element. So, we need to make wide Vector4 and wide Matrix4 structs.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">LaneVector4</span> {
+    LaneF32 x;
+    LaneF32 y;
+    LaneF32 z;
+    LaneF32 w;
+};
+
+<span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">LaneMatrix4</span> {
+    LaneVector4 data[<span style="color:#ae81ff">4</span>];
+};
+</code></pre></div>
+<p>These struct's variables and function implementations are the same as their scalar ones. Only they are using wide types now.
+Now, we have to load scene data into our wide types. Before implemented this, I thought this will generate nasty code. But turned out it wasn't.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint32_t</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> rectangleLaneArrayCount; <span style="color:#f92672">++</span>i) {
+    <span style="color:#75715e">// Wide registers are like fixed-size arrays. If we think like that way,
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// wide matrix becomes a 3D array and wide vector becomes a 2D array
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// because every element in matrices and vectors are LANE_WIDTH size fixed array.
+</span><span style="color:#75715e"></span>    ALIGN_LANE <span style="color:#66d9ef">float</span> rectanglesTransformMatrix[<span style="color:#ae81ff">4</span>][<span style="color:#ae81ff">4</span>][LANE_WIDTH];
+    ALIGN_LANE <span style="color:#66d9ef">float</span> rectanglesNormal[<span style="color:#ae81ff">3</span>][LANE_WIDTH];
+    ALIGN_LANE <span style="color:#66d9ef">float</span> rectanglesMaterialIndex[LANE_WIDTH];
+
+    <span style="color:#75715e">// Calculate the trail length
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint32_t</span> remainingRectangles <span style="color:#f92672">=</span> rectangleCount <span style="color:#f92672">-</span> i <span style="color:#f92672">*</span> LANE_WIDTH;
+    <span style="color:#66d9ef">uint32_t</span> len <span style="color:#f92672">=</span> (remainingRectangles <span style="color:#f92672">/</span> LANE_WIDTH) <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">?</span> LANE_WIDTH : remainingRectangles <span style="color:#f92672">%</span> LANE_WIDTH;
+    <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint32_t</span> j <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; j <span style="color:#f92672">&lt;</span> len; <span style="color:#f92672">++</span>j) {
+        <span style="color:#75715e">// Put scalar rectangle values into arrays
+</span><span style="color:#75715e"></span>        <span style="color:#66d9ef">uint32_t</span> rectangleIndex <span style="color:#f92672">=</span> j <span style="color:#f92672">+</span> i <span style="color:#f92672">*</span> LANE_WIDTH;
+        RectangleXY<span style="color:#f92672">*</span> rect <span style="color:#f92672">=</span> rectangles <span style="color:#f92672">+</span> rectangleIndex;
+
+        <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint32_t</span> rowIndex <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; rowIndex <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>rowIndex) {
+            <span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint32_t</span> columnIndex <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; columnIndex <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">4</span>; <span style="color:#f92672">++</span>columnIndex) {
+                rectanglesTransformMatrix[rowIndex][columnIndex][j] <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>transformMatrix[rowIndex][columnIndex];
+            }
+        }
+
+        rectanglesNormal[<span style="color:#ae81ff">0</span>][j] <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>normal.x;
+        rectanglesNormal[<span style="color:#ae81ff">1</span>][j] <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>normal.y;
+        rectanglesNormal[<span style="color:#ae81ff">2</span>][j] <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>normal.z;
+        rectanglesMaterialIndex[j] <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>materialIndex;
+    }
+
+    <span style="color:#75715e">// Put those arrays into SIMD registers.
+</span><span style="color:#75715e"></span>    RectangleLane rectangleLane <span style="color:#f92672">=</span> {};
+    rectangleLane.transformMatrix <span style="color:#f92672">=</span> LaneMatrix4(rectanglesTransformMatrix);
+    rectangleLane.normal <span style="color:#f92672">=</span> LaneVector3(rectanglesNormal);
+    rectangleLane.materialIndex <span style="color:#f92672">=</span> LaneF32(rectanglesMaterialIndex);
+
+    <span style="color:#75715e">// We are using the AoSoA layout. Our lane arrays aren&#39;t infinite like in the SoA layout.
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// We need an array to put our wide rectangles
+</span><span style="color:#75715e"></span>    rectangleLaneArray[i] <span style="color:#f92672">=</span> rectangleLane;
+}
+</code></pre></div>
+<p>Now, we can convert the rectangle intersection code using wide variables:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">uint32_t</span> rectangleLaneIndex <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; rectangleLaneIndex <span style="color:#f92672">&lt;</span> world<span style="color:#f92672">-&gt;</span>rectangleLaneArrayCount; <span style="color:#f92672">++</span>rectangleLaneIndex) {
+    RectangleLane<span style="color:#f92672">*</span> rectangleLane <span style="color:#f92672">=</span> world<span style="color:#f92672">-&gt;</span>rectangleLaneArray <span style="color:#f92672">+</span> rectangleLaneIndex;
+
+    <span style="color:#75715e">// rectangle&#39;s transform matrix is inverted on scene initialization
+</span><span style="color:#75715e"></span>    LaneMatrix4 rayMatrix <span style="color:#f92672">=</span> rectangleLane<span style="color:#f92672">-&gt;</span>transformMatrix;
+    LaneVector3 localRayOrigin <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> LaneVector4(rayOriginLane, <span style="color:#ae81ff">1.0f</span>)).xyz();
+    LaneVector3 localRayDirection <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> LaneVector4(rayDirectionLane, <span style="color:#ae81ff">0.0f</span>)).xyz();
+
+    LaneF32 t <span style="color:#f92672">=</span> (<span style="color:#f92672">-</span>localRayOrigin.z) <span style="color:#f92672">/</span> localRayDirection.z;
+    LaneVector3 hitPoint <span style="color:#f92672">=</span> localRayOrigin <span style="color:#f92672">+</span> localRayDirection <span style="color:#f92672">*</span> t;
+
+    LaneF32 hit <span style="color:#f92672">=</span> hitPoint.x <span style="color:#f92672">&lt;=</span> rectDefaultMaxPoint.x <span style="color:#f92672">&amp;</span> 
+                  hitPoint.x <span style="color:#f92672">&gt;=</span> rectDefaultMinPoint.x <span style="color:#f92672">&amp;</span>
+                  hitPoint.y <span style="color:#f92672">&lt;=</span> rectDefaultMaxPoint.y <span style="color:#f92672">&amp;</span> 
+                  hitPoint.y <span style="color:#f92672">&gt;=</span> rectDefaultMinPoint.y;
+
+    LaneF32 hitMask <span style="color:#f92672">=</span> hit <span style="color:#f92672">&amp;</span> (t <span style="color:#f92672">&lt;</span> closestHitDistanceLane) <span style="color:#f92672">&amp;</span> (t <span style="color:#f92672">&gt;</span> minHitDistance);
+    <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span>MaskIsZeroed(hitMask)) {
+        Select(<span style="color:#f92672">&amp;</span>closestHitDistanceLane, hitMask, t);
+        Select(<span style="color:#f92672">&amp;</span>hitMaterialIndexLane, hitMask, rectangleLane<span style="color:#f92672">-&gt;</span>materialIndex);
+            
+        LaneVector3 rectNormal <span style="color:#f92672">=</span> rectangleLane<span style="color:#f92672">-&gt;</span>normal;
+        <span style="color:#75715e">// Check for incident ray direction vector direction
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// If it&#39;s coming to back side of rectangle
+</span><span style="color:#75715e"></span>        <span style="color:#75715e">// Flip the normal vector
+</span><span style="color:#75715e"></span>        LaneF32 dot <span style="color:#f92672">=</span> DotProduct(rectNormal, rayDirectionLane);
+        LaneVector3 flippedRectNormal <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>rectNormal;
+        LaneF32 flipMask <span style="color:#f92672">=</span> dot <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0.0f</span>;
+        Select(<span style="color:#f92672">&amp;</span>rectNormal, flipMask, flippedRectNormal);
+        Select(<span style="color:#f92672">&amp;</span>hitNormalLane, hitMask, rectNormal);
+        anyHit <span style="color:#f92672">=</span> true;
+    }
+}
+</code></pre></div>
+<p>It's almost the same code but we used masks for if-else branches. Here are the performance numbers:</p>
+
+<ul>
+<li>with SSE4.1 <strong>0.00017 ms/ray</strong></li>
+<li>with AVX2 <strong>0.00011 ms/ray</strong></li>
+</ul>
+
+<p>We are getting more than <strong>3x</strong> speedup with AVX2 and FMA instructions. Now we can go with higher samples thanks to this optimization.
+Here is the Cornell Box scene rendered with 8000 samples per pixel:</p>
+
+<p><img src="/img/cornell-8000.png" alt="Cornell8000" /></p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Raytracer 6: Rectangles, Cornell Box</title>
+            <link>https://imgeself.github.io/posts/2019-07-20-raytracer-6-rectangles-cornell/</link>
+            <pubDate>Tue, 23 Jul 2019 17:30:51 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2019-07-20-raytracer-6-rectangles-cornell/</guid>
+            <description>Last time, we finished our GPU port. That is very valuable because GPUs are so fast, we can iterate faster when prototyping new techniques. And we implemented emissive materials. We can make spheres that emit light. Now, I want to make rectangles that emit light too. Also, rectangles will make us one step closer to the Cornell Box implementation.
+Axis-Aligned Rectangle Axis aligned rectangles are easier to implement. We can start here.</description>
+            <content type="html"><![CDATA[<p>Last time, we finished our GPU port. That is very valuable because GPUs are so fast, we can iterate faster when prototyping new techniques.
+And we implemented emissive materials. We can make spheres that emit light. Now, I want to make rectangles that emit light too.
+Also, rectangles will make us one step closer to the Cornell Box implementation.</p>
+
+<h2 id="axisaligned-rectangle">Axis-Aligned Rectangle</h2>
+
+<p>Axis aligned rectangles are easier to implement. We can start here. Axis aligned rectangles like small rectangle part of cartesian axis plane.
+We can adjust its size and distance. But we can't rotate them because it's axis-aligned. Let's implement one and look at what it's capable of.</p>
+
+<p>We define an XY plane aligned rectangle like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">RectangleXY</span> {
+    <span style="color:#75715e">// NOTE: z components of this vector should be same. Because both of them is in XY plane
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Bottom-left point of rectangle
+</span><span style="color:#75715e"></span>    Vector3 minPoint;
+    <span style="color:#75715e">// Upper-right point of rectangle
+</span><span style="color:#75715e"></span>    Vector3 maxPoint;
+};
+</code></pre></div>
+<p>Since we have constant <span  class="math">\(z\)</span> value for the rectangle, we can easily solve the intersection equation.</p>
+
+<p><span  class="math">\[ \text{Ray equation} : P = O + t*\vec D \implies P_z = O_z + t*\vec D_z \]</span></p>
+
+<p>We know <span  class="math">\(P_z\)</span> value is the z component of the rectangle. We can find <span  class="math">\(t\)</span> with little bit arrangement:</p>
+
+<p><span  class="math">\[ t = (P_z - O_z) / \vec D_z \]</span></p>
+
+<p>We can put <span  class="math">\(t\)</span> value in the ray equation and calculate a point. Then we can check x and y components of the point to see if it's in the rectangle's area.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// z value of rectangle
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">float</span> rectZ <span style="color:#f92672">=</span> rect.minPoint.z;
+
+<span style="color:#66d9ef">float</span> t <span style="color:#f92672">=</span> (rectZ <span style="color:#f92672">-</span> ray<span style="color:#f92672">-&gt;</span>origin.z) <span style="color:#f92672">/</span> ray<span style="color:#f92672">-&gt;</span>direction.z;
+Vector3 hitPoint <span style="color:#f92672">=</span> ray<span style="color:#f92672">-&gt;</span>origin <span style="color:#f92672">+</span> ray<span style="color:#f92672">-&gt;</span>direction <span style="color:#f92672">*</span> t;
+
+<span style="color:#66d9ef">bool</span> hit <span style="color:#f92672">=</span> hitVector.x <span style="color:#f92672">&lt;=</span> rect.maxPoint.x <span style="color:#f92672">&amp;&amp;</span> hitVector.x <span style="color:#f92672">&gt;=</span> rect.minPoint.x <span style="color:#f92672">&amp;&amp;</span>
+           hitVector.y <span style="color:#f92672">&lt;=</span> rect.maxPoint.y <span style="color:#f92672">&amp;&amp;</span> hitVector.y <span style="color:#f92672">&gt;=</span> rect.minPoint.y;
+</code></pre></div>
+<p>Now, rectangle intersection code is ready but we need to calculate normal vector too.
+So, if a rectangle is aligned with the XY plane normal vector should towards the camera. In our case, the normal vector should be <code>Vector3(0.0f, 0.0f, 1.0f)</code>.
+And this is what we get:</p>
+
+<p><figure><img src="/img/first-rectangle.png" alt="First Rectangle"></figure></p>
+
+<p>What a success! We have a rectangle in our scene but something is off. Look at the reflection of the rectangle on the mirror sphere.
+The backside of the rectangle looks like the same as the front side of the rectangle. That is not correct because no lights are reaching on there.
+It should be darker. This has happened because we have used one normal vector for both sides. So, we need a little more smart way to calculate the normal vector.</p>
+
+<p>Normal vector and incident ray direction vector should point opposite ways.
+Our general normal vector <code>Vector3(0.0f, 0.0f, 1.0f)</code> is okay if incident ray coming towards from the camera. But if it's coming towards the camera,
+the normal vector should be flipped.</p>
+
+<p>So, we need to determine these vectors are points the same direction or not.
+Since we have an axis-aligned rectangle, we can determine with a single dot product between incident ray direction and normal vector which points towards the camera.
+If the result of the dot product is negative, that means they are pointing in opposite directions. If the result is positive, they are pointing in the same direction. We don't want that.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Vector3 positiveZ <span style="color:#f92672">=</span> Vector3(<span style="color:#ae81ff">0.0f</span>, <span style="color:#ae81ff">0.0f</span>, <span style="color:#ae81ff">1.0f</span>);
+<span style="color:#66d9ef">float</span> dot <span style="color:#f92672">=</span> DotProduct(ray<span style="color:#f92672">-&gt;</span>direction, positiveZ);
+<span style="color:#66d9ef">if</span> (dot <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+    <span style="color:#75715e">// They are pointing in same direction
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Normal vector should be flipped
+</span><span style="color:#75715e"></span>    hitNormal <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>positiveZ;
+} <span style="color:#66d9ef">else</span> {
+    hitNormal <span style="color:#f92672">=</span> positiveZ;
+}
+</code></pre></div>
+<p><figure><img src="/img/correct-rectangle.png" alt="Correct Rectangle"></figure></p>
+
+<p>That looks more correct image.
+Now we can apply all types of material types to the rectangle.
+Here is a rectangle with emissive material applied:</p>
+
+<p><figure><img src="/img/emit-rectangle.png" alt="Emit Rectangle"></figure></p>
+
+<h2 id="oriented-rectangles">Oriented Rectangles</h2>
+
+<p>So, that is cool but what if I want to rotate this light 90 degrees for making it like toplight.
+For that, I have to make an XZ plane aligned rectangle and write it's intersection code. What if I want to rotate 45 degrees? That is no option at all.</p>
+
+<p>But what if we pretend like the rectangle already rotated and able to make intersection test, we rotate back to XY plane with incident ray and make hit test.
+That will work actually. Because we will not rotate the rectangle, we will rotate the incident ray.
+When I implemented this, I didn't know that this &quot;Instead of rotating objects, rotate the rays&quot; technique was used a lot in renderers.</p>
+
+<p>When you using game engine editors, you create objects like spheres, etc. Then you start to move them around and rotate them maybe. That transform values are kept in matrices.
+And all the objects you created, still bounds to the world's origin point. You just specify how it's position far from the origin point of the world.
+This is what we are going to do. (We are not gonna do editor or something like that yet)
+We are going to create rectangles on the origin point and aligned with the XY plane. Then we are going to change it's transformation using matrices.
+On the intersection code, we are going to inverse the transformation operations.</p>
+
+<p>For that, we need a 4D vector and 4x4 matrix classes. <a href="https://github.com/imgeself/raytracer/commit/ed4f5d3668f92f3cdc6911f8e5b64a54348c4c15">(Commit)</a>. Now, rectangle struct will be like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// XY plane axis-aligned rectangle
+</span><span style="color:#75715e">// RULE: Default Rectangle are 2 unit square and it&#39;s center point always on the origin.
+</span><span style="color:#75715e">// Use transform matrices to manupilate position, scale and orientation.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> Vector3 rectDefaultMinPoint{ <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0f</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0f</span>, <span style="color:#ae81ff">0.0f</span> };
+<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> Vector3 rectDefaultMaxPoint{  <span style="color:#ae81ff">1.0f</span>,  <span style="color:#ae81ff">1.0f</span>, <span style="color:#ae81ff">0.0f</span> };
+<span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">RectangleXY</span> {
+    Matrix4 scaleMatrix;
+    Matrix4 translateMatrix;
+    Matrix4 rotationMatrix;
+};
+</code></pre></div>
+<p>We will adjust these matrices in the <code>CreateScene</code> function. In <code>IntesectWorld</code> function, we are multiplying these matrices with default points:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Matrix4 scaleTranslateMatrix <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>translateMatrix <span style="color:#f92672">*</span> rect<span style="color:#f92672">-&gt;</span>scaleMatrix;
+<span style="color:#75715e">// These are the transformed rectangle points that we will use on hit testing.
+</span><span style="color:#75715e"></span>Vector3 minPoint <span style="color:#f92672">=</span> (scaleTranslateMatrix <span style="color:#f92672">*</span> Vector4(rectDefaultMinPoint, <span style="color:#ae81ff">1.0f</span>)).xyz();
+Vector3 maxPoint <span style="color:#f92672">=</span> (scaleTranslateMatrix <span style="color:#f92672">*</span> Vector4(rectDefaultMaxPoint, <span style="color:#ae81ff">1.0f</span>)).xyz();
+
+<span style="color:#75715e">// Hit testing
+</span></code></pre></div>
+<p>So far so good, we are rendering the same scene with matrices. But our goal is to rotate the rectangles, let's implement that.
+Like I said before, we will not rotate the rectangle, we will rotate the incident ray.
+So all I need is invert rectangle's rotation matrix and multiply with incident ray.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Matrix4 rayMatrix <span style="color:#f92672">=</span> Inverse(rect<span style="color:#f92672">-&gt;</span>rotationMatrix);
+<span style="color:#75715e">// Transform ray
+</span><span style="color:#75715e">// If a Vector3 represent a point; while we converting it to the Vector4, we set component w to 1.
+</span><span style="color:#75715e">// If a Vector3 represent a vector; while we converting it to the Vector4, we set component w to 0.
+</span><span style="color:#75715e"></span>Vector3 rayOrigin <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> Vector4(ray<span style="color:#f92672">-&gt;</span>origin, <span style="color:#ae81ff">1.0f</span>)).xyz();
+Vector3 rayDirection <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> Vector4(ray<span style="color:#f92672">-&gt;</span>direction, <span style="color:#ae81ff">0.0f</span>)).xyz();
+</code></pre></div>
+<p>And we get this:</p>
+
+<p><figure><img src="/img/word-90-rotate.png" alt="RotatoWorld90"></figure></p>
+
+<p>It rotated 90 degrees but around world origin. I want to rotate around its origin. So we need to translate back origin, rotate, and translate again:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Matrix4 rayMatrix <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>translateMatrix <span style="color:#f92672">*</span> Inverse(rect<span style="color:#f92672">-&gt;</span>rotationMatrix) <span style="color:#f92672">*</span> Inverse(rect<span style="color:#f92672">-&gt;</span>translateMatrix);
+</code></pre></div>
+<p>Now we get what we wanted:</p>
+
+<p><figure><img src="/img/90-rotate.png" alt="Rotate90"></figure></p>
+
+<p>Execution time is 3 times slower now and we have just one rectangle in the scene. We need to optimize this process.
+At least we have flexible rectangles. Now, I think it's time! Oh yeah, Cornell Box!</p>
+
+<h2 id="cornell-box">Cornell Box</h2>
+
+<p>We are going to need a lot of rectangles for the Cornell Box scene. So I've started to write some helper functions for creating rectangles.
+We need box types also. Boxes are essentially a shape which has 6 rectangles for faces. And the scene needs 2 boxes and 6 rectangles.
+5 for the walls and 1 for the top light. After writing little bit boilerplate code we get this:</p>
+
+<p><figure><img src="/img/cornell.png" alt="Cornell"></figure></p>
+
+<p>Yeah! It works! But this 512 spp image rendered in 10 minutes. Our raytracer is way slower now.
+Let's make some optimizations or should I say; fix stupid thigs.</p>
+
+<p>So, the first one is obvious, right? Why we have a scale, translate and rotation matrices are stored separately.
+We can combine them into one transform matrix and use it's inverse for transforming rays.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">RectangleXY</span> {
+    Matrix4 transformMatrix;
+    <span style="color:#75715e">// We keep rotation matrix seperate as well because we are using this for rotating the rectangle normal.
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// TODO: Instead of keeping rotation matrix, why not keep normal vector itself?
+</span><span style="color:#75715e"></span>    Matrix4 rotationMatrix;
+    <span style="color:#66d9ef">uint32_t</span> materialIndex;
+};
+</code></pre></div>
+<p>With this improvement, our intersection code is now simpler. We don't transform rectangle coordinates at all. Now, we are only transforming incident rays.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">for</span> every rectangle:
+    RectangleXY<span style="color:#f92672">*</span> rect <span style="color:#f92672">=</span> world<span style="color:#f92672">-&gt;</span>rectangles <span style="color:#f92672">+</span> rectangleIndex;
+
+    Matrix4 rayMatrix <span style="color:#f92672">=</span> Inverse(rect<span style="color:#f92672">-&gt;</span>transformMatrix);
+    Vector3 rayOrigin <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> Vector4(ray<span style="color:#f92672">-&gt;</span>origin, <span style="color:#ae81ff">1.0f</span>)).xyz();
+    Vector3 rayDirection <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> Vector4(ray<span style="color:#f92672">-&gt;</span>direction, <span style="color:#ae81ff">0.0f</span>)).xyz();
+
+    ... Hit testing ...
+</code></pre></div>
+<p>There are lots of things to optimize this code. For example, we only need an inverted version of the transform matrix.
+Why don't we invert the transformation matrix on the initialization stage and put that in rectangle struct? We will do further performance improvements in the next post.</p>
+
+<p>Also, in every Cornell Box scene, those two boxes are little rotated.
+So I've <a href="https://github.com/imgeself/raytracer/commit/dfdf5aa8a4f6e06fe3a3e7f0308fba4999fcbb2d">added</a> a helper function to rotate boxes and we get this:</p>
+
+<p><figure><img src="/img/correct-cornell.png" alt="CornellRotated"></figure></p>
+
+<h2 id="learnings-and-whats-next">Learnings and what's next</h2>
+
+<p>The most valuable thing I learned when implementing these features is that instead of transform scene objects, we can transform the incident ray.
+This way is easier in some cases. Like rectangles in our case.</p>
+
+<p>I've implemented this rectangle support first in GPU but I haven't finished yet.
+Next, we will be doing some optimizations, SIMD rectangles maybe? And we will finish our GPU implementation as well.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Raytracer 5: GPU, OpenGL and Compute Shaders</title>
+            <link>https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/</link>
+            <pubDate>Wed, 26 Jun 2019 17:29:51 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/</guid>
+            <description>I bought a new computer for myself. And the first thing I tried, porting my raytracer to the Windows platform and try it on the new CPU. And the performance went up to 0.000007ms/ray on 6 core CPU. This is 3x speedup from my old laptop which has 2 core CPU. So multithreading scales up linearly. That&#39;s good!.
+Emissive Materials The next feature I wanted to add to the raytracer is the lighting.</description>
+            <content type="html"><![CDATA[
+
+<p>I bought a new computer for myself. And the first thing I tried, porting my raytracer to the Windows platform and try it on the new CPU.
+And the performance went up to <strong>0.000007ms/ray</strong> on 6 core CPU. This is 3x speedup from my old laptop which has 2 core CPU. So multithreading
+scales up linearly. That's good!.</p>
+
+<h2 id="emissive-materials">Emissive Materials</h2>
+
+<p>The next feature I wanted to add to the raytracer is the lighting. Currently, all scene illuminated with skylight.
+Kinda cool to have emissive spheres in our scene. And that turned out really easy to implement.
+I just added <code>emitColor</code> property to the Material struct. On raytracing loop:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">/* If bounce hit sphere */</span>
+
+<span style="color:#75715e">// Add the attenuated emit color to result color.
+</span><span style="color:#75715e"></span>result <span style="color:#f92672">+=</span> attenuation <span style="color:#f92672">*</span> mat.emitColor;
+<span style="color:#75715e">// Keep continue attenuation
+</span><span style="color:#75715e"></span>attenuation <span style="color:#f92672">*=</span> mat.color;
+
+<span style="color:#75715e">/* Keep continue to bouncing */</span>
+</code></pre></div>
+<p>And we got:</p>
+
+<p><img src="/img/emit-512spp.png" alt="512" /></p>
+
+<p>Looks good but too noisy. We need more samples to generate reasonable image.</p>
+
+<p><img src="/img/emit-8000spp.png" alt="8000" /></p>
+
+<p>This one rendered with 8000 spp. Less noisy but our execution time is too long now. This image rendered in almost 3 minutes.
+Since I have brought a new computer and it has a very decent GPU and we need more performance, I think we can try to run our raytracer into GPU.</p>
+
+<h2 id="implementation">Implementation</h2>
+
+<p>I'm not gonna talk about what GPU is and what is rendering pipeline.
+Since you are reading this blog, you probably know already and there are amazing pieces of information out there.
+I will be using <a href="https://www.khronos.org/opengl/wiki/Compute_Shader" target="_blank">compute shaders</a> for this implementation.
+Since we have written our raytracer on CPU and I want a copy-paste level easy port(because I'm lazy), compute shader is an obvious choice.
+It has a similar multithreading <a href="https://www.khronos.org/opengl/wiki/Compute_Shader##Execution_model" target="_blank">execution model</a> that we use on the CPU.</p>
+
+<p>So, compute shader is going to do all the same work that CPU doing.
+Then it is going to produce the image as a texture object and send the texture into the fragment shader.
+The fragment shader is going to <a href="https://en.wikipedia.org/wiki/SRGB" target="_blank">gamma correct</a> our image and render the image to the screen.</p>
+
+<p>In this implementation, I am going to use OpenGL. Since it is kinda easy and I know it at the basic level, we can go with that.
+OpenGL got computer shader support in version 4.3 but we are going with version 4.5.</p>
+
+<h2 id="window-creation">Window Creation</h2>
+
+<p>I started with the window and context creation code. I used Win32 API for window management because I didn't want to use a 3rd party library for this.
+There is a little tricky situation about GL context creation. To able to create GL context with <a href="https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)##Create_Context_with_Attributes" target="_blank">attributes</a>,
+we have to use WGL extension called <code>wglCreateContextAttribsARB</code>. <a href="https://www.khronos.org/registry/OpenGL/extensions/ARB/WGL_ARB_create_context.txt" target="_blank">That extension</a>
+gives us a modern context that we can use. But in able to use WGL extensions, we have use <a href="https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)" target="_blank">context</a>. So we have to create an old context then load WGL extensions then
+create modern context and use it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// Create OpenGL context
+</span><span style="color:#75715e"></span>HGLRC wglContext <span style="color:#f92672">=</span> wglCreateContext(deviceContext);
+<span style="color:#75715e">// To able to use wgl extensions, we have to make current a WGL context.
+</span><span style="color:#75715e">// Otherwise we can&#39;t get function pointers to WGL extensions.
+</span><span style="color:#75715e"></span>wglMakeCurrent(deviceContext, wglContext);
+
+<span style="color:#75715e">// Load WGL extensions.
+</span><span style="color:#75715e"></span>gladLoadWGL(deviceContext);
+
+<span style="color:#66d9ef">int</span> glAttribs[] <span style="color:#f92672">=</span> {
+    WGL_CONTEXT_MAJOR_VERSION_ARB, <span style="color:#ae81ff">4</span>,
+    WGL_CONTEXT_MINOR_VERSION_ARB, <span style="color:#ae81ff">5</span>,
+    WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
+    WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+    <span style="color:#ae81ff">0</span>,
+};
+
+<span style="color:#75715e">// Create new WGL context with attributes, using WGL extensions.
+</span><span style="color:#75715e">// And make current the new one and delete the old one.
+</span><span style="color:#75715e"></span>HGLRC newContext <span style="color:#f92672">=</span> wglCreateContextAttribsARB(deviceContext, <span style="color:#ae81ff">0</span>, glAttribs);
+wglMakeCurrent(deviceContext, newContext);
+wglDeleteContext(wglContext);
+</code></pre></div>
+<p>Rest of the window creation code is pretty straight forward.</p>
+
+<h2 id="shaders">Shaders</h2>
+
+<p>On writing shaders, we are lucky. Because most of the shader programming languages are very similar to C++. We can just copy-paste our raytracer code to the computer shader file.
+One thing different is that data type and common function names are not the same as in the CPU version. So I used macros for type name defines.</p>
+
+<p>Another problem that we have is how we send scene data into the compute shader. So there are two popular options for that.
+<a href="https://www.khronos.org/opengl/wiki/Uniform_Buffer_Object" target="_blank">Uniform Buffer Objects</a> or <a href="https://www.khronos.org/opengl/wiki/Shader_Storage_Buffer_Object" target="_blank">Shader Storage Buffer Objects</a>.
+UBOs are for small fast-access type data. SSBOs are for bigger data types.
+I choose SSBO over UBO because SSBO supports variable size arrays. And I like to pass our scene elements to shaders without specifying fixed-size.
+It is almost the same as the other buffer objects in GLSL. We can define SSBO simply put <code>buffer</code> for type:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">layout(shared, binding <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>) buffer MaterialBuffer {
+    Material gMaterials[]; <span style="color:#75715e">// Variable size array
+</span><span style="color:#75715e"></span>};
+</code></pre></div>
+<h2 id="alignment">Alignment</h2>
+
+<p>So that went easy but we have a problem now. The alignment of SSBO structs is not the same as C++ ones.
+According to OpenGL specs:
+&gt; If the member is a structure, the base alignment of the structure is N, where N is the largest base alignment value of any of its members ...</p>
+
+<p>In our case, we have vec3 in our structs. Size of vec3 is 12 bytes but vec3 count as vec4. So our alignment for structs should be 16.
+This can be done in many ways. You can put padding data into the structs.</p>
+
+<p>Or we can define offsets and tweak layout properties using <a href="https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_enhanced_layouts.txt" target="_blank">enhanced layout extension</a>.
+For example the <code>Material</code> struct:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Material</span> {
+    <span style="color:#75715e">// These two can be bundled as a vector4. First three component for color and 4th component for refractiveIndex;
+</span><span style="color:#75715e"></span>    Vector3 color;
+    <span style="color:#66d9ef">float</span> refractiveIndex;
+
+    <span style="color:#75715e">// These two too
+</span><span style="color:#75715e"></span>    Vector3 emitColor;
+    <span style="color:#66d9ef">float</span> reflection; 
+};
+</code></pre></div>
+<p>This type of layout packing can be done in GLSL like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Material</span> {
+    <span style="color:#75715e">// In GLSL, all the vec3 type variables aligned to 16 bytes (vec4). 
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// We can use extra float padding with enhanced layout extension.
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// layout(component = 3) means w component of vec4 holds this value.
+</span><span style="color:#75715e"></span>    vec3 color;
+    layout(component <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>) <span style="color:#66d9ef">float</span> refractiveIndex;
+    vec3 emitColor;
+    layout(component <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>) <span style="color:#66d9ef">float</span> reflection; 
+};
+</code></pre></div>
+<p>And it is worked pretty well on Intel Integrated GPU. I didn't have to align memory in C++ code.
+But enhanced layout extension doesn't supported in compute shaders on Nvidia GPUs.
+So I gave up on that and ended up <a href="https://docs.microsoft.com/en-us/cpp/cpp/align-cpp?view=vs-2019" target="_blank">aligning structs</a> in C++ code.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// Align this struct members to 16 byte.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">__declspec</span>(align(<span style="color:#ae81ff">16</span>)) <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Material</span> {
+    Vector3 color;
+    <span style="color:#66d9ef">float</span> refractiveIndex;
+    Vector3 emitColor;
+    <span style="color:#66d9ef">float</span> reflection; 
+};
+</code></pre></div>
+<h2 id="errors">Errors</h2>
+
+<p>When you coding an OpenGL app, you often end up with a black screen.
+We need to find errors causing a black screen. First, we need to create our OpenGL context with debug properties.
+Second, we need to fetch errors and print them, so we can look at it. Previously, this can be done with the <code>glGetError</code> <a href="https://www.khronos.org/opengl/wiki/GLAPI/glGetError" target="_blank">function</a>.
+You have to put this function after every GL function. But, in version 4.3 they added a <a href="https://www.khronos.org/opengl/wiki/OpenGL_Error##Catching_errors_.28the_easy_way.29" target="_blank">debug callback feature</a>.
+Now you can simply write a message proc function and add to debug output using <code>glDebugMessageCallback</code> <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDebugMessageCallback.xhtml" target="_blank">function</a>.</p>
+
+<p>I can't find any compute shader debugger for OpenGL. So it went hard to finding errors and fixing them.
+One particular is TDR.</p>
+
+<h2 id="tdr">TDR</h2>
+
+<p>When I managed to do raytracing in the integrated GPU, I immediately switched the default GPU to 1050Ti.
+Just for seeing how much faster. On integrated GPU it rendered 2048 spp image around 5 seconds.
+I wanted to know how much speedup we gain from Nvidia GPU. The same working program always crashed on the dedicated GPU.
+There was no error in GL debug output. There was no hint about what caused the problem.
+So I searched an Nvidia GPU crash diagnoser and I found <a href="https://developer.nvidia.com/nvidia-aftermath" target="_blank">Nvidia Aftermath</a>. The exact tool I was looking for.
+But guess what? It doesn't support OpenGL. But when I looked at a <a href="https://www.youtube.com/watch?v=VaGcs5-W6S4" target="_blank">video</a> about Aftermath, there is a chart about GPU crashes:</p>
+
+<p><img src="/img/crash-reasons.png" alt="CrashReasons" /></p>
+
+<p>There is one caught my eye which says &quot;Long Running Execution&quot;. So decreased the sample size and tried again. And it worked.
+So the problem was something called <a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/display/timeout-detection-and-recovery" target="_blank">Timeout Detection &amp; Recovery</a>.
+If you use %100 of dedicated GPU period of time (default 2 sec), Windows is going to reset the GPU. That is what happened to me.</p>
+
+<h2 id="progressive-rendering">&quot;Progressive Rendering&quot;</h2>
+
+<p>All production raytracers behave like: it generates a very poor sampled image and it improves the image by continuing to sampling as the program runs.
+I wanted to add this feature. So the idea is that we add a new image to the averaged image in every frame.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// First image previously sampled image.
+</span><span style="color:#75715e"></span>layout(rgba32f, location <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>) readonly uniform image2D srcImage;
+<span style="color:#75715e">// Output image.
+</span><span style="color:#75715e"></span>layout(rgba32f, location <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>) writeonly uniform image2D destImage;
+...
+<span style="color:#75715e">// Number of frames averaged into srcImage 
+</span><span style="color:#75715e"></span>layout(location <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>) uniform <span style="color:#66d9ef">uint32_t</span> frameIndex;
+
+...
+
+<span style="color:#75715e">// Calcualte the sum of all previous samples
+</span><span style="color:#75715e"></span>Vector3 sumColor <span style="color:#f92672">=</span> prevColor <span style="color:#f92672">*</span> frameIndex;
+<span style="color:#75715e">// Add new color to sum, then re-average it.
+</span><span style="color:#75715e"></span>Vector3 finalColor <span style="color:#f92672">=</span> (color <span style="color:#f92672">+</span> sumColor) <span style="color:#f92672">/</span> (frameIndex <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</code></pre></div>
+<h2 id="performance">Performance</h2>
+
+<p>To able to measure performance, I needed to figure out how to count ray bounces. There is an <a href="https://www.khronos.org/opengl/wiki/Atomic_Counter" target="_blank">Atomic Counter</a> in OpenGL.
+First, I tried the atomic counter but atomic counters only support increment and decrement operations. If you want to use
+more <a href="https://www.khronos.org/opengl/wiki/Atomic_Counter##Operations" target="_blank">atomic algebra operations</a> you have to use OpenGL in version 4.6 or an <a href="https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shader_atomic_counter_ops.txt" target="_blank">extension</a>.
+I didn't want to do it. So instead of atomic counters, I used SSBO again for the counter.
+Then use <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/atomicAdd.xhtml" target="_blank">naive atomic add operation</a>. It worked with the same performance if we did with atomic counter buffers.
+After compute shader finished its job, I mapped the bounce count SSBO for reading bounce count.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// GLSL code
+</span><span style="color:#75715e"></span>layout(binding <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>) buffer Counter { 
+    <span style="color:#66d9ef">uint32_t</span> gBounceCount; 
+};
+...
+atomicAdd(gBounceCount, totalBounces);
+
+<span style="color:#75715e">// C++ code
+</span><span style="color:#75715e"></span>glBindBuffer(GL_SHADER_STORAGE_BUFFER, bounceCountSSBO);
+<span style="color:#66d9ef">uint32_t</span><span style="color:#f92672">*</span> counter <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint32_t</span><span style="color:#f92672">*</span>) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+<span style="color:#66d9ef">uint32_t</span> bounceCount <span style="color:#f92672">=</span> counter[<span style="color:#ae81ff">0</span>];
+glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+</code></pre></div>
+<ul>
+<li><p>On integrated GPU, program runs <strong>47ms 0.0000025ms/ray</strong> for per frame.
+It is more than <strong>2.5x</strong> speedup from CPU.</p></li>
+
+<li><p>On Nvidia 1050Ti, program runs <strong>14ms 0.0000008ms/ray</strong> for per frame.
+This is nearly <strong>10x</strong> faster than CPU.</p></li>
+</ul>
+
+<h2 id="learnings">Learnings</h2>
+
+<p>Now we have a raytracer that runs on GPU. Cool but now we have 2 raytracers actually. We literally copied the same code on the CPU.
+Now we have to implement all the features for both sides. That is not a very good approach. In the future, we'll put raytracing code into a shared header or something.
+But It's okay for now.</p>
+
+<p>Here are things that I learned from implementing GPU port:
+ - Even with copy-paste like implementation, GPU runs code way faster than CPU. We did nothing to optimize yet. That's impressive!
+ - OpenGL can be simple (I think it's not) but I had a hard time on debugging because of lack of debugging tools. Especially for compute shaders, I can't find any tool.
+ I think starters shouldn't start with APIs which easy to use, they should start with the one which got most debugging tools. Because when you go a little bit further,
+ you are alone with debugging tools.
+ - One of the problems I had on GPU porting is that GLSL doesn't map memory into zeros.
+ It doesn't have a constructor that we use in C++ for filling struct memory with zeros. You should aware of that.
+ - The biggest problem that caused a black screen was alignment. When using UBO or SSBO, you should take alignment into count.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Raytracer 4: SIMD</title>
+            <link>https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/</link>
+            <pubDate>Tue, 30 Apr 2019 17:29:51 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/</guid>
+            <description>NOTE: This is my first real experience with SIMD. So whatever I do next, might be completely stupid and wrong! This is a learning exercise for me! So, yeah.
+ The last post, we implement multithreading on the raytracer and we get nearly 2.5x performance boost up. There is another parallelism technique called SIMD. I&#39;m going to try to implement in the raytracer. But first, let&#39;s measure our program.</description>
+            <content type="html"><![CDATA[
+
+<blockquote>
+<p>NOTE: This is my first real experience with SIMD. So whatever I do next, might
+be completely stupid and wrong! This is a learning exercise for me! So, yeah.</p>
+</blockquote>
+
+<p>The last post, we implement multithreading on the raytracer and we get nearly 2.5x
+performance boost up. There is another parallelism technique called SIMD.
+I'm going to try to implement in the raytracer. But first, let's measure our program.</p>
+
+<p><img src="/img/before-simd-measure.png" alt="ScalarMeasure" /></p>
+
+<p>As you can see the image above, the program spends half of his time on intersection checking.
+So it's a smart idea that starting simd optimization on intersection checking first.</p>
+
+<h2 id="what-is-simd">What is SIMD</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/SIMD" target="_blank">SIMD</a> stands for &quot;Single Instruction Multiple Data&quot;.
+I think SIMD basically viewed as operations on arrays. For example, instead of
+adding single float to another single float and get a single float result,
+you add elements of a float array to another float array then get a float array result.</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*uiYS-VhMxoUm9EKMNTMwgQ.jpeg" alt="SIMD" /></p>
+
+<p>This image (which taken from <a href="https://medium.com/@bromanz/simd-sse-unity3d-net-2-0-70f6c911713f" target="_blank">here</a>)
+clearly shows what's happening. On the left, we use single float type and make 4 additions to
+get results that we want. On the right, 4-length arrays adding in single add operations
+and we get all result in 4-length array.</p>
+
+<p>The problem is: How we are gonna modify our code to get performance benefits of SIMD?</p>
+
+<h2 id="intersectworldwide">IntersectWorldWide</h2>
+
+<p>In the <code>IntersectWorld</code> function, we test every ray for if it has collision to scene objects.
+We have 1 plane in our scene, so that should be remain scalar. Most of the work is doing
+on sphere intersection checking. Since we have more than 1 spheres, we could try to check multiple spheres at once.</p>
+
+<p>For that, we need to store spheres into more SIMD friendly shape. We need to put members
+into arrays. <a href="https://software.intel.com/en-us/articles/memory-layout-transformations" target="_blank">SoA (Structure of Arrays)</a>
+layout is good for this. Instead of layout the sphere classic way, we can layout this way:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SphereWide</span> {
+  <span style="color:#66d9ef">float</span> sphereX[N];
+  <span style="color:#66d9ef">float</span> sphereY[N];
+  <span style="color:#66d9ef">float</span> sphereZ[N];
+  <span style="color:#66d9ef">float</span> radius[N];
+  <span style="color:#66d9ef">uint32_t</span> hitMaterialIndex[N];
+};
+</code></pre></div>
+<p>The SoA layout is very helpful when you only need one or two members of struct cases.
+Because of every member are arrays, cache line fills with relevant data, not the data we don't use.
+That gives a huge performance boost. A good example of this problem shown
+<a href="https://www.youtube.com/watch?v=0_Byw9UMn9g" target="_blank">here</a>.</p>
+
+<p>But in our case, we always use every member of Sphere in function. So we need something in between.
+And that is called <a href="https://software.intel.com/en-us/articles/memory-layout-transformations" target="_blank">AoSoA</a> layout.
+It's like fixed SoA layout. Members are still arrays but array size equal to SIMD vector size.
+If your sphere size greater than <code>LANE_WIDTH</code>, you add another sphere lane into <code>sphereLaneArray</code>.
+That way we can perfectly store spheres into SIMD registers.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SphereLane</span> {
+  <span style="color:#66d9ef">float</span> sphereX[LANE_WIDTH];
+  <span style="color:#66d9ef">float</span> sphereY[LANE_WIDTH];
+  <span style="color:#66d9ef">float</span> sphereZ[LANE_WIDTH];
+  <span style="color:#66d9ef">float</span> radius[LANE_WIDTH];
+  <span style="color:#66d9ef">uint32_t</span> hitMaterialIndex[LANE_WIDTH];
+};
+
+SphereLane sphereLaneArray[sphereLaneArrayCount];
+</code></pre></div>
+<p>When you put your data in the right shape, the rest of the problem is easy. We almost use
+the exactly same code for sphere intersection but with wide variable types.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// Broadcast scalar values into lanes.
+</span><span style="color:#75715e"></span>LaneVector3 <span style="color:#a6e22e">rayOrigin</span>(ray<span style="color:#f92672">-&gt;</span>origin);
+LaneVector3 <span style="color:#a6e22e">rayDirection</span>(ray<span style="color:#f92672">-&gt;</span>direction);
+
+<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> sphereLaneIndex <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; sphereLaneIndex <span style="color:#f92672">&lt;</span> world<span style="color:#f92672">-&gt;</span>sphereSoAArrayCount; <span style="color:#f92672">++</span>sphereLaneIndex) {
+    SphereSoALane sphereSoA <span style="color:#f92672">=</span> world<span style="color:#f92672">-&gt;</span>sphereSoAArray[sphereLaneIndex];
+
+    ...
+    Intersection code in wide
+    ...
+}
+
+<span style="color:#75715e">// To make horizontal check operations on lanes, we store them into scalar float array
+</span><span style="color:#75715e">// And iterate over them. This is the complexity comes with SIMD.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (anyHit) {
+	<span style="color:#75715e">// After calculating n sphere ray intersection, we have to find which one is closer.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// This is probably the most naive way to do it. We store lane values into an array and iterating through to find any close hit.
+</span><span style="color:#75715e"></span>	ALIGN_LANE <span style="color:#66d9ef">float</span> closestHitDistanceLaneArray[LANE_WIDTH];
+	ALIGN_LANE <span style="color:#66d9ef">float</span> hitMaterialIndexLaneArray[LANE_WIDTH];
+	ALIGN_LANE <span style="color:#66d9ef">float</span> hitNormalLaneXArray[LANE_WIDTH];
+	ALIGN_LANE <span style="color:#66d9ef">float</span> hitNormalLaneYArray[LANE_WIDTH];
+	ALIGN_LANE <span style="color:#66d9ef">float</span> hitNormalLaneZArray[LANE_WIDTH];
+	StoreLane(closestHitDistanceLaneArray, closestHitDistanceLane);
+	StoreLane(hitMaterialIndexLaneArray, hitMaterialIndexLane);
+	StoreLane(hitNormalLaneXArray, hitNormalLane.x);
+	StoreLane(hitNormalLaneYArray, hitNormalLane.y);
+	StoreLane(hitNormalLaneZArray, hitNormalLane.z);
+	<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> LANE_WIDTH; <span style="color:#f92672">++</span>i) {
+	    <span style="color:#66d9ef">float</span> t <span style="color:#f92672">=</span> closestHitDistanceLaneArray[i];
+	    <span style="color:#66d9ef">if</span> (t <span style="color:#f92672">&lt;</span> closestHitDistance) {
+		closestHitDistance <span style="color:#f92672">=</span> t;
+		hitMaterialIndex <span style="color:#f92672">=</span> hitMaterialIndexLaneArray[i];
+		hitNormal <span style="color:#f92672">=</span> Vector3(hitNormalLaneXArray[i],
+				    hitNormalLaneYArray[i],
+				    hitNormalLaneZArray[i]);
+	    }
+	}
+}
+</code></pre></div>
+<p>Let's measure our code with SIMD operations:</p>
+
+<ul>
+<li>Before SIMD: <strong>49.2 Mray/s, 0.000020 ms/ray</strong></li>
+<li>After SIMD: <strong>54.8Mray/s, 0.000018ms/ray</strong></li>
+</ul>
+
+<p>We get a speed-up with 4-wide SSE operations but not too much. Where is the 4x?</p>
+
+<h2 id="amdahl-s-law">Amdahl's Law</h2>
+
+<p>There is an <a href="https://en.wikipedia.org/wiki/Amdahl%27s_law" target="_blank">Amdahl's Law</a>. Which tells us;
+the speedup gain from parallelization depends on how much of your program can be parallelized.</p>
+
+<p><img src="http://www.wikizero.biz/index.php?q=aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9ucy9lL2VhL0FtZGFobHNMYXcuc3Zn" alt="Amdahl" /></p>
+
+<p>The program was spending %50 of its execution time in <code>IntersectWorld</code> function.
+As you can see image above; no matter how many processors, how many lanes you use,
+we can't get over 2x. This is one of the primary reason why we are not getting 4x speedup
+with 4-lane vectorization.</p>
+
+<h2 id="compiler-switches">Compiler switches</h2>
+
+<p>Most of the graphics programs I've seen use <code>-ffast-math</code> settings.
+So I gave a try for it. And I get same speed with clang compiler on my machine.
+Fast math doesn't give too much on clang. Let's try with GCC.</p>
+
+<ul>
+<li>Clang <code>-O2</code>: <strong>54.8Mray/s, 0.000018ms/ray</strong></li>
+<li>Clang <code>-O2 -ffast-math</code>: <strong>54.8Mray/s, 0.000018ms/ray</strong> (It's roughly the same performance with fast math)</li>
+<li>GCC <code>-O2</code>: <strong>63.2Mray/s, 0.000016ms/ray</strong> (It's already faster than clang without fast math)</li>
+<li>GCC <code>-O2 -ffast-math</code>: <strong>65.6Mray/s, 0.000015ms/ray</strong> (Fast math doing something on GCC)</li>
+</ul>
+
+<p>I used <code>-msse4.1</code> switch for enabling SSE instructions. My CPU supports 8-wide AVX2 instructions
+so we can enable these instructions with <code>-mavx2</code> flag. So with the 4-wide SSE, we can
+check intersection with 4 spheres at the same time. With AVX2, we can check 8 spheres. But our scene
+only contains 4 spheres now. So we are not gaining performance from AVX2.</p>
+
+<p>And there is another flag called <code>-march=native</code>. Which uses all CPU capabilities
+and generate optimized code for that CPU. After compiling with native flag our performance
+up to <strong>75.3Mray/s, 0.000013ms/ray</strong>. Wow!! That's an unexpected performance gain.
+But how? Let's look at the assembly code.</p>
+
+<p><img src="/img/assembly.png" alt="Assembly" /></p>
+
+<p>The only difference I see between <code>-mavx2</code> and <code>-march=native</code> are those weird</p>
+<pre><code class="language-vfmadd231ps``` instructions. What are they?" data-lang="vfmadd231ps``` instructions. What are they?">## FMA Instruction Set
+Apparently, there is an instruction set called [FMA](https://en.wikipedia.org/wiki/FMA_instruction_set).
+This instruction set, allows you to perform multiply and add operations in one instruction.
+Compiler optimized some code with FMA operations already. Bu we can manually write FMA
+operations with [intrinsics](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=FMA).</code></pre>
+<p>c++
+inline LaneF32 FMulAdd(const LaneF32 left, const LaneF32 right, const LaneF32 addend) {
+    LaneF32 result;
+#ifdef <strong>FMA</strong>
+    result.m = _mm256_fmadd_ps(left.m, right.m, addend.m);
+#else
+    result = (left * right) + addend;
+#endif</p>
+<pre><code>return result;</code></pre>
+<p>};</p>
+<pre><code>We can implement DotProduct with FMA operations like this:</code></pre>
+<p>c++
+inline LaneF32 DotProduct(const LaneVector3 left, const LaneVector3 right) {
+    return FMulAdd(left.x, right.x, FMulAdd(left.y, right.y, (left.z * right.z)));
+};
+```</p>
+
+<p>After converting one or two operations to FMA operations, performance stays the same as before.
+This is because when we compiled our program with <code>-march=native</code> flag, the compiler converted to
+all dot products to FMA instructions. That's why we got such a performance improvement.
+But making manually is good too. You know what you getting. FMA commit is <a href="https://github.com/imgeself/raytracer/commit/8e2074b01eb91d3d3becda9a1961274121309a46" target="_blank">here</a>.</p>
+
+<h2 id="learnings">Learnings</h2>
+
+<ul>
+<li>If you use correct memory layouts when implementing SIMD, the rest of the problems solves itself.</li>
+<li>Parallel performance heavily depends on how much of your program parallelized.</li>
+<li>Compiling code with <code>-march=native</code> flag produces efficient code on your CPU.</li>
+</ul>
+
+<p>I won't parallelize more program for now. I think its time to implement rendering techniques
+instead of optimizing.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Raytracer 3: Multithreading</title>
+            <link>https://imgeself.github.io/posts/2019-03-23-raytracer-3-multithreading/</link>
+            <pubDate>Sat, 23 Mar 2019 16:32:32 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2019-03-23-raytracer-3-multithreading/</guid>
+            <description>Last post, we implemented a custom random number generator. And we got 21.0 Mray/s, 0.000048 ms/ray on my laptop. So lets try to improve performance more.
+You might have seen this famous image before which taken from here. What this image tells us is that even transistor count still increasing linearly, processors not getting faster anymore like used to be. But on the other hand, when the single threaded performance speed of acceleration starts to drop, the number of logical core count begins to increase.</description>
+            <content type="html"><![CDATA[
+
+<p>Last post, we implemented a custom random number generator.
+And we got <strong>21.0 Mray/s, 0.000048 ms/ray</strong> on my laptop.
+So lets try to improve performance more.</p>
+
+<p><img src="https://www.karlrupp.net/wp-content/uploads/2015/06/40-years-processor-trend.png" alt="CPU" /></p>
+
+<p>You might have seen this famous image before which taken from <a href="https://www.karlrupp.net/2015/06/40-years-of-microprocessor-trend-data/" target="_blank">here</a>. What this image tells us is that even transistor count
+still increasing linearly, processors not getting faster anymore like used to be.
+But on the other hand, when the single threaded performance speed of acceleration starts to drop,
+the number of logical core count begins to increase.</p>
+
+<p>So the lesson I got here is that if you write a single-threaded program, you will not get much
+a performance on new processors. You need to use cpu cores to get much more performance on new processors.
+That's what I'm gonna try to do right now.</p>
+
+<h2 id="utilizing-the-cpu-cores">Utilizing the CPU cores</h2>
+
+<p>For utilizing CPU threads, we need some way to break our program into pieces. And that's a very hard problem.
+If you figure out how to break your program into pieces, then you have to figure out how to synchronize them.
+But we are lucky! Raytracer is easily breakable into chunks. We are calculating image pixels.
+And every pixel independent to others. We won't have much trouble with synchronization.
+The cores going to render image pixels with independent to others.
+After finishing all the pixels, we going to write the output image.</p>
+
+<h2 id="lock-free-programming">&quot;Lock-free&quot; programming</h2>
+
+<p>I read a document about <a href="https://docs.microsoft.com/en-us/windows/desktop/DxTechArts/lockless-programming" target="_blank">lockless programming</a>.
+It's talk about problems about multithreading, how compilers and processors behave, how console CPUs differs from PC CPUs, etc.
+It's talk about around Windows API but all of the things are valid in other platforms too.
+I want to implement multithreading using atomics for synchronization so that threads not will be blocked.
+It's generally easier using locks instead of atomic instructions like document says.
+But I think in this project, atomic instructions will not be that hard. So I will give a shot.</p>
+
+<h2 id="implementing">Implementing</h2>
+
+<p>Let's try to divide our program into pieces. My laptop has 4 threads.
+If we can divide image to thread count and give each thread a piece, we can render image 4 times faster, right?
+Umm, sadly no! As you can see in the image below, if we divide image to the thread count,
+thread 2, will do the most part of the work, and thread 1, 3, 4 will wait for the thread 2 after finishing its job.
+This is not efficient and it's almost same as using single-thread in this case.</p>
+
+<p><img src="/img/thread_parts.png" alt="Parts" /></p>
+
+<p>So how do we divide work evenly to all threads? The answer is simple. We divide the image into more parts.
+All threads execute its task and switch to other tasks in the work queue immediately.
+So that way if a thread gets a long-running job, other threads will be busy for executing other jobs.
+A good visual explanation for this problem is <a href="https://developer.apple.com/videos/play/wwdc2017/706/?time=345" target="_blank">here</a>.</p>
+
+<p>For the implementing first I created a thread for every row on the image.
+Then I used <a href="https://en.wikipedia.org/wiki/Grand_Central_Dispatch" target="_blank">Apple GCD</a>.
+You can easily multithread your loop using the <code>dispatch_apply</code> function.
+It uses all threads and waits all to be finished. So there is no need for synchronization.
+GCD automatically does for us. It is a really easy and perfect fit for our program.
+You can see the GCD implementation <a href="https://github.com/imgeself/raytracer/blob/gcd-threading/main.cpp" target="_blank">here</a>.</p>
+
+<p>But I ended up using a simple work queue method from <a href="https://www.youtube.com/watch?v=ZAeU3Z0PmcU" target="_blank">Handmade Ray</a>.
+We create work orders and put them into a queue.
+Then every thread looping through the queue and executing waiting jobs.
+If there is no job to be executed, we release the thread. I think it's a easy, understandable and flexible method.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">WorkOrder</span> {
+    Image<span style="color:#f92672">*</span> image;
+    World<span style="color:#f92672">*</span> world;
+    <span style="color:#66d9ef">uint32_t</span> startRowIndex;
+    <span style="color:#66d9ef">uint32_t</span> endRowIndex;
+    <span style="color:#66d9ef">uint32_t</span> sampleSize;
+    <span style="color:#66d9ef">uint32_t</span><span style="color:#f92672">*</span> randomState;
+};
+
+<span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">WorkQueue</span> {
+    <span style="color:#66d9ef">uint32_t</span> workOrderCount;
+    WorkOrder<span style="color:#f92672">*</span> workOrders;
+
+    <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">uint64_t</span> nextOrderToDo;
+    <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">uint64_t</span> finishedOrderCount;
+    <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">uint64_t</span> totalBouncesComputed;
+};
+
+<span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">RaytraceWork</span>(WorkQueue<span style="color:#f92672">*</span> workQueue) {
+    <span style="color:#66d9ef">uint32_t</span> nextOrderToDo <span style="color:#f92672">=</span> InterlockedAddAndReturnPrevious(<span style="color:#f92672">&amp;</span>workQueue<span style="color:#f92672">-&gt;</span>nextOrderToDo, <span style="color:#ae81ff">1</span>);
+    <span style="color:#66d9ef">if</span> (nextOrderToDo <span style="color:#f92672">&gt;=</span> workQueue<span style="color:#f92672">-&gt;</span>workOrderCount) {
+        <span style="color:#66d9ef">return</span> false;
+    }
+
+    fetch the next WorkOrder
+
+    ...
+    <span style="color:#66d9ef">do</span> the raytracing
+    ...
+
+    InterlockedAddAndReturnPrevious(<span style="color:#f92672">&amp;</span>workQueue<span style="color:#f92672">-&gt;</span>totalBouncesComputed, totalBounces);
+    InterlockedAddAndReturnPrevious(<span style="color:#f92672">&amp;</span>workQueue<span style="color:#f92672">-&gt;</span>finishedOrderCount, <span style="color:#ae81ff">1</span>);
+    <span style="color:#66d9ef">return</span> true;
+}
+</code></pre></div>
+<p>And we get 1.3x speedup from 4 threads. Hmm, not what I expected.</p>
+
+<h2 id="problems">Problems</h2>
+
+<p>I put the random state pointer in the <code>WorkOrder</code> struct. And it's shared across all threads.
+But random number generator changes the value of the state. But writing the shared data in a thread is a dangerous thing.
+As <a href="https://twitter.com/rygorous" target="_blank">rygorous</a> pointed at his blog:
+<a href="https://fgiesen.wordpress.com/2013/01/31/cores-dont-like-to-share/" target="_blank">Cores don’t like to share</a>.
+After you write shared data, other threads must throw all the work,
+fetch the actual value of the variable because the cached version of data not valid anymore,
+then start it's work over. This is often calling <a href="https://www.youtube.com/watch?v=WDIkqP4JbkE" target="_blank">&quot;false sharing&quot;</a>.</p>
+
+<p>So I put the random state in thread locally. So every thread writes its own random state.
+After implementing this simple change we get 2x speedup. Not bad!</p>
+
+<p>There is another data that shared across all threads and we are writing in it.
+<code>totalBouncesComputed</code> is a number of total bounce count that we use for measuring our program.
+We are adding the number of bounces calculated on every pixel. We are doing in every sample.
+I added a local variable for total bounce number, then added it to <code>totalBouncesComputed</code>.
+Instead of incrementing hundreds of per work order, we going to do once.
+After implementing this change we get 2.3x speedup. See the commit <a href="https://github.com/imgeself/raytracer/commit/ba3fe88926c3036bc616a3e238fa721c03f9ad86" target="_blank">here</a>.</p>
+
+<h2 id="performance">Performance</h2>
+
+<p>Let's look at how much speed we gain from threads:</p>
+
+<p><img src="/img/speed-graph.png" alt="Chart" /></p>
+
+<p>So when we use second thread, we speed up linearly, almost 2x. This makes sense on 2 core, 4 thread CPU.
+But we did not speed up linearly after using third and fourth thread.
+This means we did not gain much from <a href="https://en.wikipedia.org/wiki/Hyper-threading" target="_blank">hyper-threading</a>.
+Honestly, I don't really know how to fine-tune and properly use of hyper-threading.
+So it's subject for future posts I guess.</p>
+
+<p>At the end we got <strong>49.2 Mray/s, 0.000020 ms/ray</strong>. Can we improve the performance more?
+I will try to using SIMD for more performance in the next post.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Raytracer 2: Custom Random Number Generator Function</title>
+            <link>https://imgeself.github.io/posts/2019-02-26-raytracer-2-custom-random-function/</link>
+            <pubDate>Tue, 26 Feb 2019 20:42:39 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2019-02-26-raytracer-2-custom-random-function/</guid>
+            <description>Last post we implement some cool features to the ray tracer. For going furthermore first we need to improve the performance of our program. In this way, we can iterate faster.
+Some Measurements Before doing any optimization, let&#39;s measure the current code. I&#39;m using the built-in clock API instead of using some benchmarking library. We are measuring big long loops. The clock API&#39;s resolution enough for our purposes now. The current result when 32 rays per pixel is: - On my mac laptop (Core i7-7660U 2.</description>
+            <content type="html"><![CDATA[
+
+<p>Last post we implement some cool features to the ray tracer. For going furthermore
+first we need to improve the performance of our program. In this way, we can iterate faster.</p>
+
+<h2 id="some-measurements">Some Measurements</h2>
+
+<p>Before doing any optimization, let's measure the current code. I'm using the built-in
+<a href="http://www.cplusplus.com/reference/ctime/clock/" target="_blank">clock API</a> instead of using some
+benchmarking library. We are measuring big long loops. The clock API's resolution
+enough for our purposes now. The current result when 32 rays per pixel is:
+  - On my mac laptop (Core i7-7660U 2.50GHz): <strong>18.1 Mray/s</strong> which means <strong>0.000055 ms/ray</strong></p>
+
+<h2 id="xorshift">Xorshift</h2>
+
+<p>For the first step of optimizing, I decided to replace built-in <code>rand()</code> with
+a custom random number generator function. Because <code>rand()</code> not very fast generator and
+changing that is a good start for optimization.</p>
+
+<p><a href="https://en.wikipedia.org/wiki/Xorshift" target="_blank">Xorshift</a> is a random number generator
+function that produces reasonably random numbers very fast. It's a few lines of code
+and very easy to implement.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">inline</span> <span style="color:#66d9ef">uint32_t</span> <span style="color:#a6e22e">XOrShift32</span>(<span style="color:#66d9ef">uint32_t</span> <span style="color:#f92672">*</span>state)
+{
+    <span style="color:#66d9ef">uint32_t</span> x <span style="color:#f92672">=</span> <span style="color:#f92672">*</span>state;
+    x <span style="color:#f92672">^=</span> x <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">13</span>;
+    x <span style="color:#f92672">^=</span> x <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">17</span>;
+    x <span style="color:#f92672">^=</span> x <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">5</span>;
+    <span style="color:#f92672">*</span>state <span style="color:#f92672">=</span> x;
+    <span style="color:#66d9ef">return</span> x;
+}
+</code></pre></div>
+<p>After implementing the function, performance up to <strong>21.0 Mray/s, 0.000048 ms/ray</strong>
+on the same rays per pixel size as before. That's a <strong>~%16</strong> performance gain for such a small change.
+And the rendered image is nearly the same as before. No artifacts.</p>
+
+<p>I'm finishing the blog post here to keep it small. Next up: I will try to implement multithreading.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Raytracer 1: Little More Advanced Shading</title>
+            <link>https://imgeself.github.io/posts/2019-02-19-raytracer-1-little-more-advanced-shading/</link>
+            <pubDate>Tue, 19 Feb 2019 22:13:28 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2019-02-19-raytracer-1-little-more-advanced-shading/</guid>
+            <description>Last post, I built a ray tracer with very basic direct illumination code. It was good but we need go further for more fun. So it&#39;s time to implement some other material types.
+Diffuse, Lambertian, Dielectric For the new materials, I added new variables to the material struct for reflective and refractive materials:
+struct Material { float refractiveIndex; // Refractive index of material. 0 means no refraction.  float reflection; // 0 is pure diffuse, 1 is mirror.</description>
+            <content type="html"><![CDATA[
+
+<p>Last post, I built a ray tracer with very basic direct illumination code. It was good
+but we need go further for more fun. So it's time to implement some other material types.</p>
+
+<h2 id="diffuse-lambertian-dielectric">Diffuse, Lambertian, Dielectric</h2>
+
+<p>For the new materials, I added new variables to the material struct for reflective and refractive materials:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Material</span> {
+    <span style="color:#66d9ef">float</span> refractiveIndex; <span style="color:#75715e">// Refractive index of material. 0 means no refraction.
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">float</span> reflection; <span style="color:#75715e">// 0 is pure diffuse, 1 is mirror.
+</span><span style="color:#75715e"></span>    Vector3 color;
+};
+</code></pre></div>
+<p>Core <code>RaytraceWord</code> <a href="https://github.com/imgeself/raytracer/blob/master/main.cpp#L72" target="_blank">function</a>
+is changed for the new material types. And it's now work like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// Main ray trace function.
+</span><span style="color:#75715e">// I use a loop-based tracing instead of recursion-based trace function.
+</span><span style="color:#75715e">// You can write clean code by using recursion but I find recursion hard to understand.
+</span><span style="color:#75715e">// This way is more straightforward and understandable for me.
+</span><span style="color:#75715e"></span>Vector3 <span style="color:#a6e22e">RaytraceWorld</span>(World<span style="color:#f92672">*</span> world, Ray<span style="color:#f92672">*</span> ray) {
+  <span style="color:#66d9ef">for</span> (bounce count) {    
+    check <span style="color:#66d9ef">for</span> intersection
+    <span style="color:#66d9ef">if</span> (isIntersect) {
+      attenuation <span style="color:#f92672">*=</span> mat.color;
+
+      isRefract <span style="color:#f92672">=</span> check <span style="color:#66d9ef">for</span> refraction
+
+      <span style="color:#66d9ef">if</span> (material is dielectric <span style="color:#f92672">&amp;&amp;</span> isRefract) {
+        set refractedRay
+        calculate the fresnelCoefficient
+      }
+
+      mirrorBounce <span style="color:#f92672">=</span> perfect bounce along surface normal
+      randomBounce <span style="color:#f92672">=</span> random ray along surface normal
+      reflectedRay <span style="color:#f92672">=</span> lerp between random and mirror bounce based on material<span style="color:#960050;background-color:#1e0010">&#39;</span>s reflection coefficient
+
+      picking the next ray direction between reflected and refracted ray based on fresnelCoefficient
+      <span style="color:#75715e">// We use the Russian Roulette method for determining which way to go
+</span><span style="color:#75715e"></span>      ...
+
+    } <span style="color:#66d9ef">else</span> {
+       <span style="color:#75715e">// Hit nothing (sky)
+</span><span style="color:#75715e"></span>       result <span style="color:#f92672">=</span> attenuation;
+    }
+  }
+
+  <span style="color:#66d9ef">return</span> color
+}
+</code></pre></div>
+<blockquote>
+<p>When trying to implement new materials, I end up getting weird rendering artifacts
+along the way. Just looking at them and debugging the ray transport for why the
+artifacts happen, is amazingly fun and informative.</p>
+</blockquote>
+
+<p>When we run this code we get this interesting image.</p>
+
+<p><img src="/img/render-1spp.bmp" alt="Render1spp" /></p>
+
+<h2 id="sampling">Sampling</h2>
+
+<p>This rendering algorithm based on probability. The more we sample, the better the image gets.
+So I put <code>RaytraceWorld</code> function into a sample loop. Then we calculate the average color and write into the image.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Vector3 <span style="color:#a6e22e">color</span>(<span style="color:#ae81ff">0.0f</span>, <span style="color:#ae81ff">0.0f</span>, <span style="color:#ae81ff">0.0f</span>);
+<span style="color:#66d9ef">for</span> (sampleSize) {
+
+    ...
+
+    Ray ray <span style="color:#f92672">=</span> {};
+    ray.origin <span style="color:#f92672">=</span> cameraPosition;
+    ray.direction <span style="color:#f92672">=</span> Normalize(filmPosition <span style="color:#f92672">-</span> cameraPosition);
+
+    color <span style="color:#f92672">+=</span> RaytraceWorld(<span style="color:#f92672">&amp;</span>world, <span style="color:#f92672">&amp;</span>ray);
+}
+
+ pixelColor <span style="color:#f92672">=</span> (color <span style="color:#f92672">/</span> sampleSize);
+</code></pre></div>
+<blockquote>
+<p>Note: Sampling is actually an advanced topic in rendering. And there is a tradeoff between sampling and performance. Increasing sample size make the image look cool but it slows the program's execution time. What I did here is a very basic way of sampling. Maybe we implement more clear sampling techniques like <a href="https://en.wikipedia.org/wiki/Importance_sampling" target="_blank">importance sampling</a> in the future.</p>
+</blockquote>
+
+<p>When we run our code in 512 sample per pixel, we get this nice, smooth image.</p>
+
+<p><img src="/img/render-post1.bmp" alt="Render" /></p>
+
+<h2 id="what-s-next">What's Next</h2>
+
+<p>I want to implement more features to this ray tracer such as texture mapping,
+light emitters, 3D model rendering, etc. But before all of that, I will try to
+optimize the program and try to add a custom random function, implement multithreading,
+ simd, etc.</p>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Raytracer 0: Intro</title>
+            <link>https://imgeself.github.io/posts/2019-01-02-raytracer-0-intro/</link>
+            <pubDate>Wed, 02 Jan 2019 23:16:27 +0300</pubDate>
+            
+            <guid>https://imgeself.github.io/posts/2019-01-02-raytracer-0-intro/</guid>
+            <description>I started to develop raytracer using C++ for learning computer graphics.
+You can find source code in here.
+Main references for this raytracer are:
+ Handmade Ray (Raytracing extension of Handmade Hero) Peter Shirley&#39;s ray tracing books Aras&#39;s amazing blog posts Scratchapixel  First, I wrote BMP image writer and math, vector utils. Then I wrote sphere, plane, world, light structures and basic intersection code. Most raytracer tutorials starts teaching using global illumination and there is a good reason for that.</description>
+            <content type="html"><![CDATA[<p>I started to develop raytracer using C++ for learning computer graphics.</p>
+
+<p>You can find source code in <a href="https://github.com/imgeself/raytracer/tree/baba952f46f980c8ff1295f594b20bef437d82a2" target="_blank">here.</a></p>
+
+<p>Main references for this raytracer are:</p>
+
+<ul>
+<li><a href="https://hero.handmade.network/episode/ray/" target="_blank">Handmade Ray</a> (Raytracing extension of Handmade Hero)</li>
+<li><a href="https://github.com/petershirley" target="_blank">Peter Shirley's ray tracing books</a></li>
+<li><a href="http://aras-p.info/blog/2018/03/28/Daily-Pathtracer-Part-0-Intro/" target="_blank">Aras's amazing blog posts</a></li>
+<li><a href="https://www.scratchapixel.com/index.php" target="_blank">Scratchapixel</a></li>
+</ul>
+
+<p>First, I wrote <a href="https://en.wikipedia.org/wiki/BMP_file_format" target="_blank">BMP</a> image writer and math, vector utils.
+Then I wrote sphere, plane, world, light structures and basic intersection code.
+Most raytracer tutorials starts teaching using global illumination and there is a good reason for that.
+The power of raytracing is creating a photorealistic image using global illumination in relatively small code.
+But I started using direct illumination from my small OpenGL-rendering experiences to understand the core concept.</p>
+
+<p><img src="/img/diffuse.bmp" alt="Diffuse Lighting" /></p>
+
+<p>After writing the diffuse lighting code image is already getting started to look good and 3D-ish. Now, we need hard shadows for direct illumination.
+I used a very simple solution for hard shadows. Just throw shadow ray to light and check for intersection. If there is a intersection then threat that pixel as a shadow. Super simple stuff:</p>
+
+<p><img src="/img/hardshadow.bmp" alt="Hard Shadows" /></p>
+
+<p>Then I added more lights to the scene and wrote very simple and not physically accurate multi light support. Just for seeing multiple shadows. And image looks good for such basic calculations.
+In the next blog post, I will try to implement little more realistic light calculations for this raytracer.</p>
+
+<p><img src="/img/render-post0.bmp" alt="Render" /></p>
+]]></content>
+        </item>
+        
+    </channel>
+</rss>

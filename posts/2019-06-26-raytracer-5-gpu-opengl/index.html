@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="I bought a new computer for myself. And the first thing I tried, porting my raytracer to the Windows platform and try it on the new CPU. And the performance went up to 0.000007ms/ray on 6 core CPU. This is 3x speedup from my old laptop which has 2 core CPU. So multithreading scales up linearly. That&#39;s good!.
+Emissive Materials The next feature I wanted to add to the raytracer is the lighting." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/" />
+
+
+    <title>
+        
+            Raytracer 5: GPU, OpenGL and Compute Shaders :: Dear World, 
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.3be786f7e7db164c2f02fff303c9f011f026f3df1f61a2ce993b4c5005163bcd.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Raytracer 5: GPU, OpenGL and Compute Shaders">
+<meta itemprop="description" content="I bought a new computer for myself. And the first thing I tried, porting my raytracer to the Windows platform and try it on the new CPU. And the performance went up to 0.000007ms/ray on 6 core CPU. This is 3x speedup from my old laptop which has 2 core CPU. So multithreading scales up linearly. That&#39;s good!.
+Emissive Materials The next feature I wanted to add to the raytracer is the lighting.">
+<meta itemprop="datePublished" content="2019-06-26T17:29:51&#43;03:00" />
+<meta itemprop="dateModified" content="2019-06-26T17:29:51&#43;03:00" />
+<meta itemprop="wordCount" content="1838">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Raytracer 5: GPU, OpenGL and Compute Shaders"/>
+<meta name="twitter:description" content="I bought a new computer for myself. And the first thing I tried, porting my raytracer to the Windows platform and try it on the new CPU. And the performance went up to 0.000007ms/ray on 6 core CPU. This is 3x speedup from my old laptop which has 2 core CPU. So multithreading scales up linearly. That&#39;s good!.
+Emissive Materials The next feature I wanted to add to the raytracer is the lighting."/>
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2019-06-26 17:29:51 &#43;0300 &#43;03" />
+
+
+
+
+
+
+
+
+    </head>
+
+    <body class="dark-theme">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">echo &#34;Dear World,</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://imgeself.github.io/about/">About</a></li><li><a href="https://imgeself.github.io/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle unselectable"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>9 minutes
+
+            
+
+            </p>
+        </div>
+
+        <article>
+            <h1 class="post-title">
+                <a href="https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/">Raytracer 5: GPU, OpenGL and Compute Shaders</a>
+            </h1>
+
+            
+
+            <div class="post-content">
+                
+
+<p>I bought a new computer for myself. And the first thing I tried, porting my raytracer to the Windows platform and try it on the new CPU.
+And the performance went up to <strong>0.000007ms/ray</strong> on 6 core CPU. This is 3x speedup from my old laptop which has 2 core CPU. So multithreading
+scales up linearly. That's good!.</p>
+
+<h2 id="emissive-materials">Emissive Materials</h2>
+
+<p>The next feature I wanted to add to the raytracer is the lighting. Currently, all scene illuminated with skylight.
+Kinda cool to have emissive spheres in our scene. And that turned out really easy to implement.
+I just added <code>emitColor</code> property to the Material struct. On raytracing loop:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">/* If bounce hit sphere */</span>
+
+<span style="color:#75715e">// Add the attenuated emit color to result color.
+</span><span style="color:#75715e"></span>result <span style="color:#f92672">+=</span> attenuation <span style="color:#f92672">*</span> mat.emitColor;
+<span style="color:#75715e">// Keep continue attenuation
+</span><span style="color:#75715e"></span>attenuation <span style="color:#f92672">*=</span> mat.color;
+
+<span style="color:#75715e">/* Keep continue to bouncing */</span>
+</code></pre></div>
+<p>And we got:</p>
+
+<p><img src="/img/emit-512spp.png" alt="512" /></p>
+
+<p>Looks good but too noisy. We need more samples to generate reasonable image.</p>
+
+<p><img src="/img/emit-8000spp.png" alt="8000" /></p>
+
+<p>This one rendered with 8000 spp. Less noisy but our execution time is too long now. This image rendered in almost 3 minutes.
+Since I have brought a new computer and it has a very decent GPU and we need more performance, I think we can try to run our raytracer into GPU.</p>
+
+<h2 id="implementation">Implementation</h2>
+
+<p>I'm not gonna talk about what GPU is and what is rendering pipeline.
+Since you are reading this blog, you probably know already and there are amazing pieces of information out there.
+I will be using <a href="https://www.khronos.org/opengl/wiki/Compute_Shader" target="_blank">compute shaders</a> for this implementation.
+Since we have written our raytracer on CPU and I want a copy-paste level easy port(because I'm lazy), compute shader is an obvious choice.
+It has a similar multithreading <a href="https://www.khronos.org/opengl/wiki/Compute_Shader##Execution_model" target="_blank">execution model</a> that we use on the CPU.</p>
+
+<p>So, compute shader is going to do all the same work that CPU doing.
+Then it is going to produce the image as a texture object and send the texture into the fragment shader.
+The fragment shader is going to <a href="https://en.wikipedia.org/wiki/SRGB" target="_blank">gamma correct</a> our image and render the image to the screen.</p>
+
+<p>In this implementation, I am going to use OpenGL. Since it is kinda easy and I know it at the basic level, we can go with that.
+OpenGL got computer shader support in version 4.3 but we are going with version 4.5.</p>
+
+<h2 id="window-creation">Window Creation</h2>
+
+<p>I started with the window and context creation code. I used Win32 API for window management because I didn't want to use a 3rd party library for this.
+There is a little tricky situation about GL context creation. To able to create GL context with <a href="https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)##Create_Context_with_Attributes" target="_blank">attributes</a>,
+we have to use WGL extension called <code>wglCreateContextAttribsARB</code>. <a href="https://www.khronos.org/registry/OpenGL/extensions/ARB/WGL_ARB_create_context.txt" target="_blank">That extension</a>
+gives us a modern context that we can use. But in able to use WGL extensions, we have use <a href="https://www.khronos.org/opengl/wiki/Creating_an_OpenGL_Context_(WGL)" target="_blank">context</a>. So we have to create an old context then load WGL extensions then
+create modern context and use it:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// Create OpenGL context
+</span><span style="color:#75715e"></span>HGLRC wglContext <span style="color:#f92672">=</span> wglCreateContext(deviceContext);
+<span style="color:#75715e">// To able to use wgl extensions, we have to make current a WGL context.
+</span><span style="color:#75715e">// Otherwise we can&#39;t get function pointers to WGL extensions.
+</span><span style="color:#75715e"></span>wglMakeCurrent(deviceContext, wglContext);
+
+<span style="color:#75715e">// Load WGL extensions.
+</span><span style="color:#75715e"></span>gladLoadWGL(deviceContext);
+
+<span style="color:#66d9ef">int</span> glAttribs[] <span style="color:#f92672">=</span> {
+    WGL_CONTEXT_MAJOR_VERSION_ARB, <span style="color:#ae81ff">4</span>,
+    WGL_CONTEXT_MINOR_VERSION_ARB, <span style="color:#ae81ff">5</span>,
+    WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
+    WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+    <span style="color:#ae81ff">0</span>,
+};
+
+<span style="color:#75715e">// Create new WGL context with attributes, using WGL extensions.
+</span><span style="color:#75715e">// And make current the new one and delete the old one.
+</span><span style="color:#75715e"></span>HGLRC newContext <span style="color:#f92672">=</span> wglCreateContextAttribsARB(deviceContext, <span style="color:#ae81ff">0</span>, glAttribs);
+wglMakeCurrent(deviceContext, newContext);
+wglDeleteContext(wglContext);
+</code></pre></div>
+<p>Rest of the window creation code is pretty straight forward.</p>
+
+<h2 id="shaders">Shaders</h2>
+
+<p>On writing shaders, we are lucky. Because most of the shader programming languages are very similar to C++. We can just copy-paste our raytracer code to the computer shader file.
+One thing different is that data type and common function names are not the same as in the CPU version. So I used macros for type name defines.</p>
+
+<p>Another problem that we have is how we send scene data into the compute shader. So there are two popular options for that.
+<a href="https://www.khronos.org/opengl/wiki/Uniform_Buffer_Object" target="_blank">Uniform Buffer Objects</a> or <a href="https://www.khronos.org/opengl/wiki/Shader_Storage_Buffer_Object" target="_blank">Shader Storage Buffer Objects</a>.
+UBOs are for small fast-access type data. SSBOs are for bigger data types.
+I choose SSBO over UBO because SSBO supports variable size arrays. And I like to pass our scene elements to shaders without specifying fixed-size.
+It is almost the same as the other buffer objects in GLSL. We can define SSBO simply put <code>buffer</code> for type:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">layout(shared, binding <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>) buffer MaterialBuffer {
+    Material gMaterials[]; <span style="color:#75715e">// Variable size array
+</span><span style="color:#75715e"></span>};
+</code></pre></div>
+<h2 id="alignment">Alignment</h2>
+
+<p>So that went easy but we have a problem now. The alignment of SSBO structs is not the same as C++ ones.
+According to OpenGL specs:
+&gt; If the member is a structure, the base alignment of the structure is N, where N is the largest base alignment value of any of its members ...</p>
+
+<p>In our case, we have vec3 in our structs. Size of vec3 is 12 bytes but vec3 count as vec4. So our alignment for structs should be 16.
+This can be done in many ways. You can put padding data into the structs.</p>
+
+<p>Or we can define offsets and tweak layout properties using <a href="https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_enhanced_layouts.txt" target="_blank">enhanced layout extension</a>.
+For example the <code>Material</code> struct:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Material</span> {
+    <span style="color:#75715e">// These two can be bundled as a vector4. First three component for color and 4th component for refractiveIndex;
+</span><span style="color:#75715e"></span>    Vector3 color;
+    <span style="color:#66d9ef">float</span> refractiveIndex;
+
+    <span style="color:#75715e">// These two too
+</span><span style="color:#75715e"></span>    Vector3 emitColor;
+    <span style="color:#66d9ef">float</span> reflection; 
+};
+</code></pre></div>
+<p>This type of layout packing can be done in GLSL like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Material</span> {
+    <span style="color:#75715e">// In GLSL, all the vec3 type variables aligned to 16 bytes (vec4). 
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// We can use extra float padding with enhanced layout extension.
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// layout(component = 3) means w component of vec4 holds this value.
+</span><span style="color:#75715e"></span>    vec3 color;
+    layout(component <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>) <span style="color:#66d9ef">float</span> refractiveIndex;
+    vec3 emitColor;
+    layout(component <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>) <span style="color:#66d9ef">float</span> reflection; 
+};
+</code></pre></div>
+<p>And it is worked pretty well on Intel Integrated GPU. I didn't have to align memory in C++ code.
+But enhanced layout extension doesn't supported in compute shaders on Nvidia GPUs.
+So I gave up on that and ended up <a href="https://docs.microsoft.com/en-us/cpp/cpp/align-cpp?view=vs-2019" target="_blank">aligning structs</a> in C++ code.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// Align this struct members to 16 byte.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">__declspec</span>(align(<span style="color:#ae81ff">16</span>)) <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Material</span> {
+    Vector3 color;
+    <span style="color:#66d9ef">float</span> refractiveIndex;
+    Vector3 emitColor;
+    <span style="color:#66d9ef">float</span> reflection; 
+};
+</code></pre></div>
+<h2 id="errors">Errors</h2>
+
+<p>When you coding an OpenGL app, you often end up with a black screen.
+We need to find errors causing a black screen. First, we need to create our OpenGL context with debug properties.
+Second, we need to fetch errors and print them, so we can look at it. Previously, this can be done with the <code>glGetError</code> <a href="https://www.khronos.org/opengl/wiki/GLAPI/glGetError" target="_blank">function</a>.
+You have to put this function after every GL function. But, in version 4.3 they added a <a href="https://www.khronos.org/opengl/wiki/OpenGL_Error##Catching_errors_.28the_easy_way.29" target="_blank">debug callback feature</a>.
+Now you can simply write a message proc function and add to debug output using <code>glDebugMessageCallback</code> <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDebugMessageCallback.xhtml" target="_blank">function</a>.</p>
+
+<p>I can't find any compute shader debugger for OpenGL. So it went hard to finding errors and fixing them.
+One particular is TDR.</p>
+
+<h2 id="tdr">TDR</h2>
+
+<p>When I managed to do raytracing in the integrated GPU, I immediately switched the default GPU to 1050Ti.
+Just for seeing how much faster. On integrated GPU it rendered 2048 spp image around 5 seconds.
+I wanted to know how much speedup we gain from Nvidia GPU. The same working program always crashed on the dedicated GPU.
+There was no error in GL debug output. There was no hint about what caused the problem.
+So I searched an Nvidia GPU crash diagnoser and I found <a href="https://developer.nvidia.com/nvidia-aftermath" target="_blank">Nvidia Aftermath</a>. The exact tool I was looking for.
+But guess what? It doesn't support OpenGL. But when I looked at a <a href="https://www.youtube.com/watch?v=VaGcs5-W6S4" target="_blank">video</a> about Aftermath, there is a chart about GPU crashes:</p>
+
+<p><img src="/img/crash-reasons.png" alt="CrashReasons" /></p>
+
+<p>There is one caught my eye which says &quot;Long Running Execution&quot;. So decreased the sample size and tried again. And it worked.
+So the problem was something called <a href="https://docs.microsoft.com/en-us/windows-hardware/drivers/display/timeout-detection-and-recovery" target="_blank">Timeout Detection &amp; Recovery</a>.
+If you use %100 of dedicated GPU period of time (default 2 sec), Windows is going to reset the GPU. That is what happened to me.</p>
+
+<h2 id="progressive-rendering">&quot;Progressive Rendering&quot;</h2>
+
+<p>All production raytracers behave like: it generates a very poor sampled image and it improves the image by continuing to sampling as the program runs.
+I wanted to add this feature. So the idea is that we add a new image to the averaged image in every frame.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// First image previously sampled image.
+</span><span style="color:#75715e"></span>layout(rgba32f, location <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>) readonly uniform image2D srcImage;
+<span style="color:#75715e">// Output image.
+</span><span style="color:#75715e"></span>layout(rgba32f, location <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>) writeonly uniform image2D destImage;
+...
+<span style="color:#75715e">// Number of frames averaged into srcImage 
+</span><span style="color:#75715e"></span>layout(location <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>) uniform <span style="color:#66d9ef">uint32_t</span> frameIndex;
+
+...
+
+<span style="color:#75715e">// Calcualte the sum of all previous samples
+</span><span style="color:#75715e"></span>Vector3 sumColor <span style="color:#f92672">=</span> prevColor <span style="color:#f92672">*</span> frameIndex;
+<span style="color:#75715e">// Add new color to sum, then re-average it.
+</span><span style="color:#75715e"></span>Vector3 finalColor <span style="color:#f92672">=</span> (color <span style="color:#f92672">+</span> sumColor) <span style="color:#f92672">/</span> (frameIndex <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>);
+</code></pre></div>
+<h2 id="performance">Performance</h2>
+
+<p>To able to measure performance, I needed to figure out how to count ray bounces. There is an <a href="https://www.khronos.org/opengl/wiki/Atomic_Counter" target="_blank">Atomic Counter</a> in OpenGL.
+First, I tried the atomic counter but atomic counters only support increment and decrement operations. If you want to use
+more <a href="https://www.khronos.org/opengl/wiki/Atomic_Counter##Operations" target="_blank">atomic algebra operations</a> you have to use OpenGL in version 4.6 or an <a href="https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_shader_atomic_counter_ops.txt" target="_blank">extension</a>.
+I didn't want to do it. So instead of atomic counters, I used SSBO again for the counter.
+Then use <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/atomicAdd.xhtml" target="_blank">naive atomic add operation</a>. It worked with the same performance if we did with atomic counter buffers.
+After compute shader finished its job, I mapped the bounce count SSBO for reading bounce count.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// GLSL code
+</span><span style="color:#75715e"></span>layout(binding <span style="color:#f92672">=</span> <span style="color:#ae81ff">3</span>) buffer Counter { 
+    <span style="color:#66d9ef">uint32_t</span> gBounceCount; 
+};
+...
+atomicAdd(gBounceCount, totalBounces);
+
+<span style="color:#75715e">// C++ code
+</span><span style="color:#75715e"></span>glBindBuffer(GL_SHADER_STORAGE_BUFFER, bounceCountSSBO);
+<span style="color:#66d9ef">uint32_t</span><span style="color:#f92672">*</span> counter <span style="color:#f92672">=</span> (<span style="color:#66d9ef">uint32_t</span><span style="color:#f92672">*</span>) glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+<span style="color:#66d9ef">uint32_t</span> bounceCount <span style="color:#f92672">=</span> counter[<span style="color:#ae81ff">0</span>];
+glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+</code></pre></div>
+<ul>
+<li><p>On integrated GPU, program runs <strong>47ms 0.0000025ms/ray</strong> for per frame.
+It is more than <strong>2.5x</strong> speedup from CPU.</p></li>
+
+<li><p>On Nvidia 1050Ti, program runs <strong>14ms 0.0000008ms/ray</strong> for per frame.
+This is nearly <strong>10x</strong> faster than CPU.</p></li>
+</ul>
+
+<h2 id="learnings">Learnings</h2>
+
+<p>Now we have a raytracer that runs on GPU. Cool but now we have 2 raytracers actually. We literally copied the same code on the CPU.
+Now we have to implement all the features for both sides. That is not a very good approach. In the future, we'll put raytracing code into a shared header or something.
+But It's okay for now.</p>
+
+<p>Here are things that I learned from implementing GPU port:
+ - Even with copy-paste like implementation, GPU runs code way faster than CPU. We did nothing to optimize yet. That's impressive!
+ - OpenGL can be simple (I think it's not) but I had a hard time on debugging because of lack of debugging tools. Especially for compute shaders, I can't find any tool.
+ I think starters shouldn't start with APIs which easy to use, they should start with the one which got most debugging tools. Because when you go a little bit further,
+ you are alone with debugging tools.
+ - One of the problems I had on GPU porting is that GLSL doesn't map memory into zeros.
+ It doesn't have a constructor that we use in C++ for filling struct memory with zeros. You should aware of that.
+ - The biggest problem that caused a black screen was alignment. When using UBO or SSBO, you should take alignment into count.</p>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1838 Words</p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2019-06-26 17:29 &#43;0300</p>
+        </div>
+
+        
+            <div class="pagination">
+                <div class="pagination__title">
+                    <span class="pagination__title-h"></span>
+                    <hr />
+                </div>
+
+                <div class="pagination__buttons">
+                    
+                        <span class="button previous">
+                            <a href="https://imgeself.github.io/posts/2019-07-20-raytracer-6-rectangles-cornell/">
+                                <span class="button__icon">←</span>
+                                <span class="button__text">Raytracer 6: Rectangles, Cornell Box</span>
+                            </a>
+                        </span>
+                    
+
+                    
+                        <span class="button next">
+                            <a href="https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/">
+                                <span class="button__text">Raytracer 4: SIMD</span>
+                                <span class="button__icon">→</span>
+                            </a>
+                        </span>
+                    
+                </div>
+            </div>
+        
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2020</span>
+            
+            
+            <span> <a href="https://imgeself.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="/bundle.min.dc716e9092c9820b77f96da294d0120aeeb189b5bcea9752309ebea27fd53bbe6b13cffb2aca8ecf32525647ceb7001f76091de4199ac5a3caa432c070247f5b.js" integrity="sha512-3HFukJLJggt3&#43;W2ilNASCu6xibW86pdSMJ6&#43;on/VO75rE8/7KsqOzzJSVkfOtwAfdgkd5BmaxaPKpDLAcCR/Ww=="></script>
+
+
+
+    </body>
+</html>

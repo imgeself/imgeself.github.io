@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="NOTE: This is my first real experience with SIMD. So whatever I do next, might be completely stupid and wrong! This is a learning exercise for me! So, yeah.
+ The last post, we implement multithreading on the raytracer and we get nearly 2.5x performance boost up. There is another parallelism technique called SIMD. I&#39;m going to try to implement in the raytracer. But first, let&#39;s measure our program." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/" />
+
+
+    <title>
+        
+            Raytracer 4: SIMD :: Dear World, 
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.3be786f7e7db164c2f02fff303c9f011f026f3df1f61a2ce993b4c5005163bcd.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Raytracer 4: SIMD">
+<meta itemprop="description" content="NOTE: This is my first real experience with SIMD. So whatever I do next, might be completely stupid and wrong! This is a learning exercise for me! So, yeah.
+ The last post, we implement multithreading on the raytracer and we get nearly 2.5x performance boost up. There is another parallelism technique called SIMD. I&#39;m going to try to implement in the raytracer. But first, let&#39;s measure our program.">
+<meta itemprop="datePublished" content="2019-04-30T17:29:51&#43;03:00" />
+<meta itemprop="dateModified" content="2019-04-30T17:29:51&#43;03:00" />
+<meta itemprop="wordCount" content="1175">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Raytracer 4: SIMD"/>
+<meta name="twitter:description" content="NOTE: This is my first real experience with SIMD. So whatever I do next, might be completely stupid and wrong! This is a learning exercise for me! So, yeah.
+ The last post, we implement multithreading on the raytracer and we get nearly 2.5x performance boost up. There is another parallelism technique called SIMD. I&#39;m going to try to implement in the raytracer. But first, let&#39;s measure our program."/>
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2019-04-30 17:29:51 &#43;0300 &#43;03" />
+
+
+
+
+
+
+
+
+    </head>
+
+    <body class="dark-theme">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">echo &#34;Dear World,</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://imgeself.github.io/about/">About</a></li><li><a href="https://imgeself.github.io/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle unselectable"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>6 minutes
+
+            
+
+            </p>
+        </div>
+
+        <article>
+            <h1 class="post-title">
+                <a href="https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/">Raytracer 4: SIMD</a>
+            </h1>
+
+            
+
+            <div class="post-content">
+                
+
+<blockquote>
+<p>NOTE: This is my first real experience with SIMD. So whatever I do next, might
+be completely stupid and wrong! This is a learning exercise for me! So, yeah.</p>
+</blockquote>
+
+<p>The last post, we implement multithreading on the raytracer and we get nearly 2.5x
+performance boost up. There is another parallelism technique called SIMD.
+I'm going to try to implement in the raytracer. But first, let's measure our program.</p>
+
+<p><img src="/img/before-simd-measure.png" alt="ScalarMeasure" /></p>
+
+<p>As you can see the image above, the program spends half of his time on intersection checking.
+So it's a smart idea that starting simd optimization on intersection checking first.</p>
+
+<h2 id="what-is-simd">What is SIMD</h2>
+
+<p><a href="https://en.wikipedia.org/wiki/SIMD" target="_blank">SIMD</a> stands for &quot;Single Instruction Multiple Data&quot;.
+I think SIMD basically viewed as operations on arrays. For example, instead of
+adding single float to another single float and get a single float result,
+you add elements of a float array to another float array then get a float array result.</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*uiYS-VhMxoUm9EKMNTMwgQ.jpeg" alt="SIMD" /></p>
+
+<p>This image (which taken from <a href="https://medium.com/@bromanz/simd-sse-unity3d-net-2-0-70f6c911713f" target="_blank">here</a>)
+clearly shows what's happening. On the left, we use single float type and make 4 additions to
+get results that we want. On the right, 4-length arrays adding in single add operations
+and we get all result in 4-length array.</p>
+
+<p>The problem is: How we are gonna modify our code to get performance benefits of SIMD?</p>
+
+<h2 id="intersectworldwide">IntersectWorldWide</h2>
+
+<p>In the <code>IntersectWorld</code> function, we test every ray for if it has collision to scene objects.
+We have 1 plane in our scene, so that should be remain scalar. Most of the work is doing
+on sphere intersection checking. Since we have more than 1 spheres, we could try to check multiple spheres at once.</p>
+
+<p>For that, we need to store spheres into more SIMD friendly shape. We need to put members
+into arrays. <a href="https://software.intel.com/en-us/articles/memory-layout-transformations" target="_blank">SoA (Structure of Arrays)</a>
+layout is good for this. Instead of layout the sphere classic way, we can layout this way:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SphereWide</span> {
+  <span style="color:#66d9ef">float</span> sphereX[N];
+  <span style="color:#66d9ef">float</span> sphereY[N];
+  <span style="color:#66d9ef">float</span> sphereZ[N];
+  <span style="color:#66d9ef">float</span> radius[N];
+  <span style="color:#66d9ef">uint32_t</span> hitMaterialIndex[N];
+};
+</code></pre></div>
+<p>The SoA layout is very helpful when you only need one or two members of struct cases.
+Because of every member are arrays, cache line fills with relevant data, not the data we don't use.
+That gives a huge performance boost. A good example of this problem shown
+<a href="https://www.youtube.com/watch?v=0_Byw9UMn9g" target="_blank">here</a>.</p>
+
+<p>But in our case, we always use every member of Sphere in function. So we need something in between.
+And that is called <a href="https://software.intel.com/en-us/articles/memory-layout-transformations" target="_blank">AoSoA</a> layout.
+It's like fixed SoA layout. Members are still arrays but array size equal to SIMD vector size.
+If your sphere size greater than <code>LANE_WIDTH</code>, you add another sphere lane into <code>sphereLaneArray</code>.
+That way we can perfectly store spheres into SIMD registers.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">SphereLane</span> {
+  <span style="color:#66d9ef">float</span> sphereX[LANE_WIDTH];
+  <span style="color:#66d9ef">float</span> sphereY[LANE_WIDTH];
+  <span style="color:#66d9ef">float</span> sphereZ[LANE_WIDTH];
+  <span style="color:#66d9ef">float</span> radius[LANE_WIDTH];
+  <span style="color:#66d9ef">uint32_t</span> hitMaterialIndex[LANE_WIDTH];
+};
+
+SphereLane sphereLaneArray[sphereLaneArrayCount];
+</code></pre></div>
+<p>When you put your data in the right shape, the rest of the problem is easy. We almost use
+the exactly same code for sphere intersection but with wide variable types.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// Broadcast scalar values into lanes.
+</span><span style="color:#75715e"></span>LaneVector3 <span style="color:#a6e22e">rayOrigin</span>(ray<span style="color:#f92672">-&gt;</span>origin);
+LaneVector3 <span style="color:#a6e22e">rayDirection</span>(ray<span style="color:#f92672">-&gt;</span>direction);
+
+<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> sphereLaneIndex <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; sphereLaneIndex <span style="color:#f92672">&lt;</span> world<span style="color:#f92672">-&gt;</span>sphereSoAArrayCount; <span style="color:#f92672">++</span>sphereLaneIndex) {
+    SphereSoALane sphereSoA <span style="color:#f92672">=</span> world<span style="color:#f92672">-&gt;</span>sphereSoAArray[sphereLaneIndex];
+
+    ...
+    Intersection code in wide
+    ...
+}
+
+<span style="color:#75715e">// To make horizontal check operations on lanes, we store them into scalar float array
+</span><span style="color:#75715e">// And iterate over them. This is the complexity comes with SIMD.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (anyHit) {
+	<span style="color:#75715e">// After calculating n sphere ray intersection, we have to find which one is closer.
+</span><span style="color:#75715e"></span>	<span style="color:#75715e">// This is probably the most naive way to do it. We store lane values into an array and iterating through to find any close hit.
+</span><span style="color:#75715e"></span>	ALIGN_LANE <span style="color:#66d9ef">float</span> closestHitDistanceLaneArray[LANE_WIDTH];
+	ALIGN_LANE <span style="color:#66d9ef">float</span> hitMaterialIndexLaneArray[LANE_WIDTH];
+	ALIGN_LANE <span style="color:#66d9ef">float</span> hitNormalLaneXArray[LANE_WIDTH];
+	ALIGN_LANE <span style="color:#66d9ef">float</span> hitNormalLaneYArray[LANE_WIDTH];
+	ALIGN_LANE <span style="color:#66d9ef">float</span> hitNormalLaneZArray[LANE_WIDTH];
+	StoreLane(closestHitDistanceLaneArray, closestHitDistanceLane);
+	StoreLane(hitMaterialIndexLaneArray, hitMaterialIndexLane);
+	StoreLane(hitNormalLaneXArray, hitNormalLane.x);
+	StoreLane(hitNormalLaneYArray, hitNormalLane.y);
+	StoreLane(hitNormalLaneZArray, hitNormalLane.z);
+	<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> LANE_WIDTH; <span style="color:#f92672">++</span>i) {
+	    <span style="color:#66d9ef">float</span> t <span style="color:#f92672">=</span> closestHitDistanceLaneArray[i];
+	    <span style="color:#66d9ef">if</span> (t <span style="color:#f92672">&lt;</span> closestHitDistance) {
+		closestHitDistance <span style="color:#f92672">=</span> t;
+		hitMaterialIndex <span style="color:#f92672">=</span> hitMaterialIndexLaneArray[i];
+		hitNormal <span style="color:#f92672">=</span> Vector3(hitNormalLaneXArray[i],
+				    hitNormalLaneYArray[i],
+				    hitNormalLaneZArray[i]);
+	    }
+	}
+}
+</code></pre></div>
+<p>Let's measure our code with SIMD operations:</p>
+
+<ul>
+<li>Before SIMD: <strong>49.2 Mray/s, 0.000020 ms/ray</strong></li>
+<li>After SIMD: <strong>54.8Mray/s, 0.000018ms/ray</strong></li>
+</ul>
+
+<p>We get a speed-up with 4-wide SSE operations but not too much. Where is the 4x?</p>
+
+<h2 id="amdahl-s-law">Amdahl's Law</h2>
+
+<p>There is an <a href="https://en.wikipedia.org/wiki/Amdahl%27s_law" target="_blank">Amdahl's Law</a>. Which tells us;
+the speedup gain from parallelization depends on how much of your program can be parallelized.</p>
+
+<p><img src="http://www.wikizero.biz/index.php?q=aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9ucy9lL2VhL0FtZGFobHNMYXcuc3Zn" alt="Amdahl" /></p>
+
+<p>The program was spending %50 of its execution time in <code>IntersectWorld</code> function.
+As you can see image above; no matter how many processors, how many lanes you use,
+we can't get over 2x. This is one of the primary reason why we are not getting 4x speedup
+with 4-lane vectorization.</p>
+
+<h2 id="compiler-switches">Compiler switches</h2>
+
+<p>Most of the graphics programs I've seen use <code>-ffast-math</code> settings.
+So I gave a try for it. And I get same speed with clang compiler on my machine.
+Fast math doesn't give too much on clang. Let's try with GCC.</p>
+
+<ul>
+<li>Clang <code>-O2</code>: <strong>54.8Mray/s, 0.000018ms/ray</strong></li>
+<li>Clang <code>-O2 -ffast-math</code>: <strong>54.8Mray/s, 0.000018ms/ray</strong> (It's roughly the same performance with fast math)</li>
+<li>GCC <code>-O2</code>: <strong>63.2Mray/s, 0.000016ms/ray</strong> (It's already faster than clang without fast math)</li>
+<li>GCC <code>-O2 -ffast-math</code>: <strong>65.6Mray/s, 0.000015ms/ray</strong> (Fast math doing something on GCC)</li>
+</ul>
+
+<p>I used <code>-msse4.1</code> switch for enabling SSE instructions. My CPU supports 8-wide AVX2 instructions
+so we can enable these instructions with <code>-mavx2</code> flag. So with the 4-wide SSE, we can
+check intersection with 4 spheres at the same time. With AVX2, we can check 8 spheres. But our scene
+only contains 4 spheres now. So we are not gaining performance from AVX2.</p>
+
+<p>And there is another flag called <code>-march=native</code>. Which uses all CPU capabilities
+and generate optimized code for that CPU. After compiling with native flag our performance
+up to <strong>75.3Mray/s, 0.000013ms/ray</strong>. Wow!! That's an unexpected performance gain.
+But how? Let's look at the assembly code.</p>
+
+<p><img src="/img/assembly.png" alt="Assembly" /></p>
+
+<p>The only difference I see between <code>-mavx2</code> and <code>-march=native</code> are those weird</p>
+<pre><code class="language-vfmadd231ps``` instructions. What are they?" data-lang="vfmadd231ps``` instructions. What are they?">## FMA Instruction Set
+Apparently, there is an instruction set called [FMA](https://en.wikipedia.org/wiki/FMA_instruction_set).
+This instruction set, allows you to perform multiply and add operations in one instruction.
+Compiler optimized some code with FMA operations already. Bu we can manually write FMA
+operations with [intrinsics](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#techs=FMA).</code></pre>
+<p>c++
+inline LaneF32 FMulAdd(const LaneF32 left, const LaneF32 right, const LaneF32 addend) {
+    LaneF32 result;
+#ifdef <strong>FMA</strong>
+    result.m = _mm256_fmadd_ps(left.m, right.m, addend.m);
+#else
+    result = (left * right) + addend;
+#endif</p>
+<pre><code>return result;</code></pre>
+<p>};</p>
+<pre><code>We can implement DotProduct with FMA operations like this:</code></pre>
+<p>c++
+inline LaneF32 DotProduct(const LaneVector3 left, const LaneVector3 right) {
+    return FMulAdd(left.x, right.x, FMulAdd(left.y, right.y, (left.z * right.z)));
+};
+```</p>
+
+<p>After converting one or two operations to FMA operations, performance stays the same as before.
+This is because when we compiled our program with <code>-march=native</code> flag, the compiler converted to
+all dot products to FMA instructions. That's why we got such a performance improvement.
+But making manually is good too. You know what you getting. FMA commit is <a href="https://github.com/imgeself/raytracer/commit/8e2074b01eb91d3d3becda9a1961274121309a46" target="_blank">here</a>.</p>
+
+<h2 id="learnings">Learnings</h2>
+
+<ul>
+<li>If you use correct memory layouts when implementing SIMD, the rest of the problems solves itself.</li>
+<li>Parallel performance heavily depends on how much of your program parallelized.</li>
+<li>Compiling code with <code>-march=native</code> flag produces efficient code on your CPU.</li>
+</ul>
+
+<p>I won't parallelize more program for now. I think its time to implement rendering techniques
+instead of optimizing.</p>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1175 Words</p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2019-04-30 17:29 &#43;0300</p>
+        </div>
+
+        
+            <div class="pagination">
+                <div class="pagination__title">
+                    <span class="pagination__title-h"></span>
+                    <hr />
+                </div>
+
+                <div class="pagination__buttons">
+                    
+                        <span class="button previous">
+                            <a href="https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/">
+                                <span class="button__icon">←</span>
+                                <span class="button__text">Raytracer 5: GPU, OpenGL and Compute Shaders</span>
+                            </a>
+                        </span>
+                    
+
+                    
+                        <span class="button next">
+                            <a href="https://imgeself.github.io/posts/2019-03-23-raytracer-3-multithreading/">
+                                <span class="button__text">Raytracer 3: Multithreading</span>
+                                <span class="button__icon">→</span>
+                            </a>
+                        </span>
+                    
+                </div>
+            </div>
+        
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2020</span>
+            
+            
+            <span> <a href="https://imgeself.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="/bundle.min.dc716e9092c9820b77f96da294d0120aeeb189b5bcea9752309ebea27fd53bbe6b13cffb2aca8ecf32525647ceb7001f76091de4199ac5a3caa432c070247f5b.js" integrity="sha512-3HFukJLJggt3&#43;W2ilNASCu6xibW86pdSMJ6&#43;on/VO75rE8/7KsqOzzJSVkfOtwAfdgkd5BmaxaPKpDLAcCR/Ww=="></script>
+
+
+
+    </body>
+</html>

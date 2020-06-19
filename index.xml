@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Dear World,</title>
+    <link>https://imgeself.github.io/</link>
+    <description>Recent content on Dear World,</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 19 Jun 2020 19:15:51 +0300</lastBuildDate>
+    
+	<atom:link href="https://imgeself.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Studying rendering of Red Dead Redemption 2</title>
+      <link>https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/</link>
+      <pubDate>Fri, 19 Jun 2020 19:15:51 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/</guid>
+      <description>One of my favorite games of all time, Red Dead Redemption returned with a prequel for consoles in 2018. Then it came for PCs in 2019. I finally managed to play the game and amazed by its graphics immediately. But I got upset because I can barely play the game on medium settings at 25 FPS with a 1050Ti laptop GPU. I know that I don&#39;t have a good rig but 25 FPS on medium settings?</description>
+    </item>
+    
+    <item>
+      <title>Raytracer 7: SIMD Rectangles</title>
+      <link>https://imgeself.github.io/posts/2019-07-28-raytracer-7-simd-rectangles/</link>
+      <pubDate>Fri, 26 Jul 2019 15:15:51 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2019-07-28-raytracer-7-simd-rectangles/</guid>
+      <description>In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers: - Previous scene with 8 spheres: 0.00009 ms/ray - Cornell Box: 0.00132 ms/ray
+We need to optimize rectangle intersection testing.
+Don&#39;t do anything more than you need to do I hinted this in the last post. We have to get rid of matrix inverse function in the IntersectWorld function because it&#39;s too heavy.</description>
+    </item>
+    
+    <item>
+      <title>Raytracer 6: Rectangles, Cornell Box</title>
+      <link>https://imgeself.github.io/posts/2019-07-20-raytracer-6-rectangles-cornell/</link>
+      <pubDate>Tue, 23 Jul 2019 17:30:51 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2019-07-20-raytracer-6-rectangles-cornell/</guid>
+      <description>Last time, we finished our GPU port. That is very valuable because GPUs are so fast, we can iterate faster when prototyping new techniques. And we implemented emissive materials. We can make spheres that emit light. Now, I want to make rectangles that emit light too. Also, rectangles will make us one step closer to the Cornell Box implementation.
+Axis-Aligned Rectangle Axis aligned rectangles are easier to implement. We can start here.</description>
+    </item>
+    
+    <item>
+      <title>Raytracer 5: GPU, OpenGL and Compute Shaders</title>
+      <link>https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/</link>
+      <pubDate>Wed, 26 Jun 2019 17:29:51 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/</guid>
+      <description>I bought a new computer for myself. And the first thing I tried, porting my raytracer to the Windows platform and try it on the new CPU. And the performance went up to 0.000007ms/ray on 6 core CPU. This is 3x speedup from my old laptop which has 2 core CPU. So multithreading scales up linearly. That&#39;s good!.
+Emissive Materials The next feature I wanted to add to the raytracer is the lighting.</description>
+    </item>
+    
+    <item>
+      <title>Raytracer 4: SIMD</title>
+      <link>https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/</link>
+      <pubDate>Tue, 30 Apr 2019 17:29:51 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/</guid>
+      <description>NOTE: This is my first real experience with SIMD. So whatever I do next, might be completely stupid and wrong! This is a learning exercise for me! So, yeah.
+ The last post, we implement multithreading on the raytracer and we get nearly 2.5x performance boost up. There is another parallelism technique called SIMD. I&#39;m going to try to implement in the raytracer. But first, let&#39;s measure our program.</description>
+    </item>
+    
+    <item>
+      <title>Raytracer 3: Multithreading</title>
+      <link>https://imgeself.github.io/posts/2019-03-23-raytracer-3-multithreading/</link>
+      <pubDate>Sat, 23 Mar 2019 16:32:32 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2019-03-23-raytracer-3-multithreading/</guid>
+      <description>Last post, we implemented a custom random number generator. And we got 21.0 Mray/s, 0.000048 ms/ray on my laptop. So lets try to improve performance more.
+You might have seen this famous image before which taken from here. What this image tells us is that even transistor count still increasing linearly, processors not getting faster anymore like used to be. But on the other hand, when the single threaded performance speed of acceleration starts to drop, the number of logical core count begins to increase.</description>
+    </item>
+    
+    <item>
+      <title>Raytracer 2: Custom Random Number Generator Function</title>
+      <link>https://imgeself.github.io/posts/2019-02-26-raytracer-2-custom-random-function/</link>
+      <pubDate>Tue, 26 Feb 2019 20:42:39 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2019-02-26-raytracer-2-custom-random-function/</guid>
+      <description>Last post we implement some cool features to the ray tracer. For going furthermore first we need to improve the performance of our program. In this way, we can iterate faster.
+Some Measurements Before doing any optimization, let&#39;s measure the current code. I&#39;m using the built-in clock API instead of using some benchmarking library. We are measuring big long loops. The clock API&#39;s resolution enough for our purposes now. The current result when 32 rays per pixel is: - On my mac laptop (Core i7-7660U 2.</description>
+    </item>
+    
+    <item>
+      <title>Raytracer 1: Little More Advanced Shading</title>
+      <link>https://imgeself.github.io/posts/2019-02-19-raytracer-1-little-more-advanced-shading/</link>
+      <pubDate>Tue, 19 Feb 2019 22:13:28 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2019-02-19-raytracer-1-little-more-advanced-shading/</guid>
+      <description>Last post, I built a ray tracer with very basic direct illumination code. It was good but we need go further for more fun. So it&#39;s time to implement some other material types.
+Diffuse, Lambertian, Dielectric For the new materials, I added new variables to the material struct for reflective and refractive materials:
+struct Material { float refractiveIndex; // Refractive index of material. 0 means no refraction.  float reflection; // 0 is pure diffuse, 1 is mirror.</description>
+    </item>
+    
+    <item>
+      <title>Raytracer 0: Intro</title>
+      <link>https://imgeself.github.io/posts/2019-01-02-raytracer-0-intro/</link>
+      <pubDate>Wed, 02 Jan 2019 23:16:27 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2019-01-02-raytracer-0-intro/</guid>
+      <description>I started to develop raytracer using C++ for learning computer graphics.
+You can find source code in here.
+Main references for this raytracer are:
+ Handmade Ray (Raytracing extension of Handmade Hero) Peter Shirley&#39;s ray tracing books Aras&#39;s amazing blog posts Scratchapixel  First, I wrote BMP image writer and math, vector utils. Then I wrote sphere, plane, world, light structures and basic intersection code. Most raytracer tutorials starts teaching using global illumination and there is a good reason for that.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://imgeself.github.io/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://imgeself.github.io/about/</guid>
+      <description>Hi! I am Hüseyin. I am an engineer who interested in computer graphics, game engines and other things. And this is my about page.</description>
+    </item>
+    
+  </channel>
+</rss>

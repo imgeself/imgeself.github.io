@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="One of my favorite games of all time, Red Dead Redemption returned with a prequel for consoles in 2018. Then it came for PCs in 2019. I finally managed to play the game and amazed by its graphics immediately. But I got upset because I can barely play the game on medium settings at 25 FPS with a 1050Ti laptop GPU. I know that I don&#39;t have a good rig but 25 FPS on medium settings?" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/" />
+
+
+    <title>
+        
+            Studying rendering of Red Dead Redemption 2 :: Dear World, 
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.3be786f7e7db164c2f02fff303c9f011f026f3df1f61a2ce993b4c5005163bcd.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Studying rendering of Red Dead Redemption 2">
+<meta itemprop="description" content="One of my favorite games of all time, Red Dead Redemption returned with a prequel for consoles in 2018. Then it came for PCs in 2019. I finally managed to play the game and amazed by its graphics immediately. But I got upset because I can barely play the game on medium settings at 25 FPS with a 1050Ti laptop GPU. I know that I don&#39;t have a good rig but 25 FPS on medium settings?">
+<meta itemprop="datePublished" content="2020-06-19T19:15:51&#43;03:00" />
+<meta itemprop="dateModified" content="2020-06-19T19:15:51&#43;03:00" />
+<meta itemprop="wordCount" content="2649">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Studying rendering of Red Dead Redemption 2"/>
+<meta name="twitter:description" content="One of my favorite games of all time, Red Dead Redemption returned with a prequel for consoles in 2018. Then it came for PCs in 2019. I finally managed to play the game and amazed by its graphics immediately. But I got upset because I can barely play the game on medium settings at 25 FPS with a 1050Ti laptop GPU. I know that I don&#39;t have a good rig but 25 FPS on medium settings?"/>
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2020-06-19 19:15:51 &#43;0300 &#43;03" />
+
+
+
+
+
+
+
+
+    </head>
+
+    <body class="dark-theme">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">echo &#34;Dear World,</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://imgeself.github.io/about/">About</a></li><li><a href="https://imgeself.github.io/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle unselectable"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>13 minutes
+
+            
+
+            </p>
+        </div>
+
+        <article>
+            <h1 class="post-title">
+                <a href="https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/">Studying rendering of Red Dead Redemption 2</a>
+            </h1>
+
+            
+
+            <div class="post-content">
+                
+
+<p>One of my favorite games of all time, <a href="https://en.wikipedia.org/wiki/Red_Dead_Redemption" target="_blank">Red Dead Redemption</a>
+returned with a <a href="https://en.wikipedia.org/wiki/Red_Dead_Redemption_2" target="_blank">prequel</a> for consoles in 2018. Then it came for PCs in 2019.
+I finally managed to play the game and amazed by its graphics immediately.
+But I got upset because I can barely play the game on medium settings at 25 FPS with a 1050Ti laptop GPU.
+I know that I don't have a good rig but 25 FPS on medium settings?</p>
+
+<p>Today, we are going to look at some frame captures from the game and try to analyze graphics techniques used in the game.</p>
+
+<h2 id="foreword">Foreword</h2>
+
+<p>This isn't an official breakdown of the game. It just me analyzing <a href="https://renderdoc.org/" target="_blank">RenderDoc</a> frame captures.
+If you want to learn from the actual developers,
+you can check the slides from a SIGGRAPH talk by <a href="https://twitter.com/globbbe" target="_blank">Fabian Bauer</a>.
+<a href="https://advances.realtimerendering.com/s2019/index.htm" target="_blank">Slides</a> (At the bottom of the page), <a href="https://dl.acm.org/doi/10.1145/3305366.3335036" target="_blank">Video</a> (starts at 1:58:00)</p>
+
+<p>You can also read a graphics analysis of GTA5 by Adrian Courrèges <a href="https://www.adriancourreges.com/blog/2015/11/02/gta-v-graphics-study/" target="_blank">here</a>.
+Since both RDR2 and GTA5 are from the same company and uses the same engine, some of the techniques from GTA5 present here as well.</p>
+
+<p>Another important thing is that, I am not a senior graphics programmer or anything like that.
+I am still a junior in this field.
+So, there will be plenty of things that I don't understand. If you find any mistakes or things that can be improved, please reach out to me. Here we go!</p>
+
+<h2 id="dissecting-a-frame">Dissecting a frame</h2>
+
+<p>Here is the main frame for dissecting:</p>
+
+<p><img src="/img/mainframe.jpg" alt="MainFrame" />
+<em>Captured on PC, medium settings.</em></p>
+
+<blockquote>
+<p>When it comes to a game like RDR2, it's almost impossible to see all the techniques in one frame.
+It amortizes its work across multiple frames.
+Because of that, I captured more than a single frame but this is the main one we are going to be focusing on.
+It contains a lot of properties like; spot and point lights, directional light (it's very subtle but it's there), buildings, NPCs, a horse, trees, vegetation, clouds, etc. It should demonstrate most of the rendering techniques used in the game.</p>
+</blockquote>
+
+<p>RDR2 is an open-world game that streams data constantly. Because of that, the frame starts with a bunch of tasks like creating and deleting textures, shader resource views, unordered access views, updating descriptors, buffers, etc.</p>
+
+<h3 id="mud-map">Mud map</h3>
+
+<p>Mud plays a big role in the game. Beside being a game mechanic, it makes envrionments more realistic. The game renders footprint textures of humans and horses into a displacement map along with trail textures of horse wagon wheels. This accumulated texture is used for <a href="https://developer.amd.com/wordpress/media/2012/10/Tatarchuk-POM.pdf" target="_blank">Parallax Occlusion Mapping</a> when rendering terrain.</p>
+
+<p><img src="/img/mudmap.png" alt="MudMap" />
+<em>Mud map: 2048x2048 <code>R16_UNORM</code></em></p>
+
+<h3 id="sky-and-clouds">Sky and clouds</h3>
+
+<p>After the mud pass, the game does a lot of work on GPU compute. Most of them related to sky and clouds.
+Clouds, fog, and volumetrics are RDR2's prominent effects.
+You can find more information about this stage on Fabian's slides. He explains in far more detail than I could ever explain.</p>
+
+<h3 id="environment-map">Environment map</h3>
+
+<p>Environment maps are the main source of reflections in RDR2 as well as GTA5.
+<a href="http://www.adriancourreges.com/blog/2015/11/02/gta-v-graphics-study/#environment-cubemap" target="_blank">Like the GTA5</a>, RDR2 generates an environment cubemap from the camera position.
+It generates a thin GBuffer for the envrionment map, similar to <a href="https://www.youtube.com/watch?v=rD6KcxcCl_8" target="_blank">Far Cry 4</a>.</p>
+
+<p><img src="/img/envalbedo.jpg" alt="EnvironmentMapAlbedo" />
+<em>Environment Cubemap Faces (Albedo): <code>RGBA8_SRGB</code></em></p>
+
+<p><img src="/img/envnormal.jpg" alt="EnvironmentMapNormal" />
+<em>Environment Cubemap Faces (Normal): <code>RGBA8_UNORM</code></em></p>
+
+<p><img src="/img/envdepth.jpg" alt="EnvironmentMapDepth" />
+<em>Environment Cubemap Faces (Depth): <code>D32S8</code></em></p>
+
+<p>Environment cubemap generation in every frame can be a heavy task. RDR2 does some optimizations to reduce the cost.
+For example, the game only draws static and opaque objects, does <a href="https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/frustum-culling-r4613/" target="_blank">frustum culling</a> before rendering each face, and draws lower LOD versions of models.
+Although, I've found that poly count of the terrain is still very high for environment maps.</p>
+
+<p>After the G-Buffer pass, a sky environment cubemap is generated using a sky paraboloid map and cloud-related textures.
+The next step is convolution. RDR2 uses <a href="https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf" target="_blank">split sum approximation</a> for Image Based Lighting.
+That method uses a pre-filtered environment cubemap along with an environment BRDF LUT.
+For filtering, the game convolutes an environment cubemap and stores convoluted versions in the cubemap's mipmap levels.</p>
+
+<p>Before executing a lighting pass for the environment cubemap, RDR2 renders baked large-scale ambient occlusion into another cubemap texture.
+The game uses screen space ambient occlusion but SSAO can help you on a small scale.
+Baked ambient occlusion helps to darken on a large scale such as darkening in patios and interiors.</p>
+
+<p><img src="/img/envao.jpg" alt="EnvironmentMapBakedAO" />
+<em>Environment Cubemap Faces (Baked AO): <code>R8_UNORM</code></em></p>
+
+<p>Even though the game generates a GBuffer, it doesn't render lights the same way as classic <a href="https://en.wikipedia.org/wiki/Deferred_shading" target="_blank">deferred rendering</a>.
+The lighting is done in one single compute pass instead of rendering every light's volume.
+So it's more like a forward rendering without shadows.
+The game also uses the &quot;top-down world lightmap&quot; technique, <a href="https://www.gdcvault.com/play/1017710/Rendering-Assassin-s-Creed" target="_blank">similar to Assassin's Creed III</a>, for baked lighting.</p>
+
+<p>For each cubemap face, RDR2 renders the final color on top of the sky environment texture.
+Then it filters the environment cubemap same as the sky environment cubemap.</p>
+
+<p><img src="/img/envfinal.jpg" alt="EnvironmentMapFinal" />
+<em>Environment Cubemap Faces (Final): <code>R11G11B10_FLOAT</code></em></p>
+
+<p>RDR2 also loads envrionment maps that located in building interiors when the player is near a building.
+These are also cubemap G-Buffers streamed from the disk.</p>
+
+<p><img src="/img/bakedenvalbedo.jpg" alt="BakedEnvironmentMapAlbedo" />
+<em>Baked Environment Cubemap Faces (Albedo): <code>BC3_SRGB</code> (Baked AO stored in alpha channel)</em></p>
+
+<p><img src="/img/bakedenvnormal.jpg" alt="BakedEnvironmentMapNormal" />
+<em>Baked Environment Cubemap Faces (Normal): <code>BC3_UNORM</code></em></p>
+
+<p><img src="/img/bakedenvdepth.jpg" alt="BakedEnvironmentMapDepth" />
+<em>Baked Environment Cubemap Faces (Depth): <code>R16_UNORM</code></em></p>
+
+<p>The game calculates the lighting of these maps and filters them like the previous ones.
+It only calculates one baked environment map at a time and only recalculates them when the time of day changes.
+All of the environment maps are stored in a texture cubemap array. There isn't any <a href="http://www.adriancourreges.com/blog/2015/11/02/gta-v-graphics-study/#cubemap-to-dual-paraboloid-map" target="_blank">cubemap to dual-paraboloid map conversion</a>.</p>
+
+<h3 id="g-buffer-pass">G-Buffer Pass</h3>
+
+<p>This stage starts with terrain depth prepass and then the game renders scene into G-Buffers.</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 0 <code>RGB</code></th>
+<th align="center">GBuffer 0 <code>A</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/albedo.jpg" alt="AlbedoTarget" /></td>
+<td align="center"><img src="/img/albedoa.jpg" alt="AlbedoTargetA" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RGBA8_SRGB</code> - This buffer contains albedo(base color) in RGB channels. I'm not sure what the alpha channel data is for but it's used on anti-aliasing stage.
+<br/><br/></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 1 <code>RGB</code></th>
+<th align="center">GBuffer 1 <code>A</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/normal.jpg" alt="NormalTarget" /></td>
+<td align="center"><img src="/img/normala.jpg" alt="NormalTargetA" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RGBA8_UNORM</code>: The RGB channels contain normals and the alpha channel contains something related to cloth and hair.
+<br/><br/></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 2 <code>RGB</code></th>
+<th align="center">GBuffer 2 <code>A</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/material.jpg" alt="MaterialTarget" /></td>
+<td align="center"><img src="/img/materiala.jpg" alt="MaterialTargetA" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RGBA8_UNORM</code>: This target is for material properties.
+
+<ul>
+<li>R: Reflectance(f0)</li>
+<li>G: Smoothness</li>
+<li>B: Metallic</li>
+<li>A: Contains some shadowing (this channel will be used as a shadow mask at later stages)
+<br/><br/></li>
+</ul></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 3 <code>R</code></th>
+<th align="center">GBuffer 3 <code>B</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/cavity.jpg" alt="Material2TargetR" /></td>
+<td align="center"><img src="/img/cavityb.jpg" alt="Material2TargetB" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RGBA8_UNORM</code>: The red channel contains cavity. There is another mystery data in the blue channel. And hair related data in the alpha channel. I can't find anything on the green channel.
+<br/><br/></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 4 <code>RG</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/motionblur.jpg" alt="MotionBlurTarget" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>RG16_FLOAT</code>: This buffer contains screen space velocity for motion blur.
+<br/><br/></li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 5 <code>Depth</code></th>
+<th align="center">GBuffer 5 <code>Stencil</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/depth.jpg" alt="DepthTarget" /></td>
+<td align="center"><img src="/img/stencil.jpg" alt="StencilTarget" /></td>
+</tr>
+</tbody>
+</table>
+
+<ul>
+<li><code>D32S8</code>: Like the GTA5, RDR2 is also using <a href="https://developer.nvidia.com/content/depth-precision-visualized" target="_blank">reversed-z</a> for depth and using the stencil buffer to assign certain values to certain group of meshes.
+<br/><br/></li>
+</ul>
+
+<p>There is another target is generated from baked data:</p>
+
+<table>
+<thead>
+<tr>
+<th align="center">GBuffer 6 <code>R</code></th>
+<th align="center">GBuffer 6 <code>G</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="center"><img src="/img/gitarget.jpg" alt="BakedAO" /></td>
+<td align="center"><img src="/img/gitargetg.jpg" alt="MysteryTarget" /></td>
+</tr>
+</tbody>
+</table>
+
+<p>This buffer contains baked ambient occlusion in the red channel, the same as in the environment map stage.
+But there are other channels in this texture. The green channel contains some data that looks like the data in GBuffer 3's blue channel.
+Again, I don't know what is this data used for. And I can't find any data in blue and alpha channels on my captures. I will investigate this further.</p>
+
+<h3 id="shadow-map-generation">Shadow Map Generation</h3>
+
+<p>After the G-Buffer stage, the game starts to render shadow maps.
+It uses 2D texture arrays for point light shadow maps and texture cube arrays for point light shadow maps.</p>
+
+<p>Some games use big shadow atlas texture for shadow maps (<a href="http://advances.realtimerendering.com/s2016/Siggraph2016_idTech6.pdf" target="_blank">e.g DOOM</a>).
+One of the advantages of that method is shadow map size can vary based on distance.
+When you use texture arrays, you lose that flexibility because all of the textures in texture arrays must be the same size.
+RDR2 has 3 different texture arrays for different quality.
+For example, spotlights have:</p>
+
+<ul>
+<li><strong>512x768 D16</strong> for distant lights</li>
+<li><strong>1024x1536 D16</strong> for medium distance(and closer distance on medium setting) lights</li>
+<li><strong>2048x3072 D16</strong> for closer lights (on high/ultra settings)</li>
+</ul>
+
+<p>Point lights cast shadows in all directions. To deal with that problem, games use a technique called <a href="https://learnopengl.com/Advanced-Lighting/Shadows/Point-Shadows" target="_blank">Omnidirectional Shadow Mapping</a>
+where you render the scene into a depth cubemap from the camera position. Campfire shadows and shadows from Arthur's lantern are rendered using this technique.
+Point light shadows have 3 different arrays for different quality settings same as spotlights.</p>
+
+<p>Most of the static point lights in the game have baked shadow cubemaps.
+So, the game uses baked shadows whenever it can and only generates shadow maps when the player is near a light-volume.
+But things get more interesting than that.</p>
+
+<p>Most of the lights on walls are spotlights but the game doesn't generate an omnidirectional shadow map for them.
+Instead, it generates a spotlight shadow map and copies that shadow map's memory into pointlight shadow map cube array.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="right"></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><img  width="512" height="768" src="/img/spotshadow.jpg"></td>
+<td align="right"><img width="128" height="768" src="/img/pointshadow.jpg"></td>
+</tr>
+</tbody>
+</table>
+
+<p><em>Left image is a 1024x1536 spotlight shadow map, right image is the same image data in 512x512 texture cube format</em></p>
+
+<blockquote>
+<p>Note that local light shadow maps stores linear z.</p>
+</blockquote>
+
+<p>That explains why they are not using a square sized shadow map for spotlights.
+Pixel count for spotlight shadow and point light texture cubemap should be the same.
+I am sure that you noticed some weird slice pattern in the right image.
+That happens because the width of spot and point light shadow map is different.</p>
+
+<p>Also note that this texture doesn't cover 360 degrees.
+But luckily, lights on buildings generally have a wall on their backside and baked shadow maps cover it.</p>
+
+<p>Another interesting thing is that this process is vice-versa.
+For example, in Saint Denis -one of the biggest cities in the game- the game generates omnidirectional shadow maps for spotlights
+and copies that data into spotlight shadow map array.
+I don't know why RDR2 doing shadow mapping like this. I couldn't find any similar technique on the internet.</p>
+
+<p>Directional light shadow mapping in RDR2 is pretty much the <a href="http://www.adriancourreges.com/blog/2015/11/02/gta-v-graphics-study/#shadows" target="_blank">same as in GTA5</a>. <a href="https://docs.microsoft.com/en-us/windows/win32/dxtecharts/cascaded-shadow-maps" target="_blank">Cascaded Shadow Mapping</a> with 4 cascades.
+Each 1024x1024 tile of the 1024x4096(medium settings) texture atlas used as a cascade.</p>
+
+<p><img src="/img/shadowcascades.jpg" alt="ShadowCascades" />
+<em>Directional Light Shadow Atlas: <code>R16_UNORM</code></em></p>
+
+<h3 id="lighting-stage">Lighting Stage</h3>
+
+<p>It's finally time to combine all of these environment maps, gbuffers, shadow maps, ao buffers.</p>
+
+<p>This stage contains two passes: The first one is for global light(sun/moon) and the second one is for local lights.</p>
+
+<h4 id="global-light-pass">Global light pass</h4>
+
+<p>The game renders a fullscreen quad for calculating directional lighting which is moonlight in this case.
+There is some baked lighting from the &quot;top-down world lightmap&quot; mentioned previously.</p>
+
+<p><img src="/img/lightpass1.jpg" alt="LightPass1" /></p>
+
+<h4 id="local-light-pass">Local light pass</h4>
+
+<p>In this pass, the game renders a low-poly sphere shape for point light volumes and octahedron like shape for spotlight volumes.
+Lights are rendered back-to-front with additive blending.</p>
+
+<p>For avoiding unnecessary shader invokes, the game uses depth bound testing which is an <a href="https://www.geeks3d.com/20130523/amd-gcn-performance-tweets-and-depth-bounds-test-dx11-demo-published/" target="_blank">extension feature</a> in OpenGL/D3D11 but becomed <a href="https://microsoft.github.io/DirectX-Specs/d3d/DepthBoundsTest.html" target="_blank">native feature</a> in Vulkan/D3D12.
+It also uses stencil testing for discarding pixels that consumed by translucent objects like glasses in windows.
+Those objects will be rendered at the forward pass.</p>
+
+<p><img src="/img/lightpass2.jpg" alt="LightPass2" /></p>
+
+<h3 id="water-rendering-and-reflections">Water rendering and reflections</h3>
+
+<p>I won't be covering water rendering in this post because it deserves a special blog post.
+But I want to talk a little bit about reflections:</p>
+
+<ul>
+<li>Like previously mentioned, environment maps are the main source of reflections. For general reflections like window reflections, the game uses them.</li>
+<li>Mirrors, on the other hand, are rendered with planar reflections where you render the scene again from the direction of the reflection. This process is handled with deferred rendering also.</li>
+<li>Water reflections use screen space reflections combined with the environment map that generated at the beginning of the frame.</li>
+</ul>
+
+<h3 id="forward-shading-stage">Forward shading stage</h3>
+
+<p>One of the disadvantages of deferred rendering pipeline is that you can't render translucent materials with GBuffers correctly.
+To solve that, the game renders translucent materials back to front with forward shading like most of the games that using deferred rendering.</p>
+
+<p>But this forward pass can be expensive because:</p>
+
+<ul>
+<li>It uses forward shading shaders which are more expensive than deferred ones.</li>
+</ul>
+
+<blockquote>
+<p>The number of registers used in a shader correlates with the number of shader instances that can be run in parallel.
+Since forward shading combines material and lighting(and shadow) calculations, the number of registers will be high in forward shaders</p>
+</blockquote>
+
+<ul>
+<li>It draws every thick translucent object twice.</li>
+</ul>
+
+<blockquote>
+<p>To achieve correct blending, you have to render back faces of an object first and render its front faces second.
+Because of that, most of the translucent objects in this stage are being drawn twice.
+2D-quad-like objects(like windows) are rendered once.</p>
+</blockquote>
+
+<ul>
+<li>And there is a pipeline state change between every draw.</li>
+</ul>
+
+<blockquote>
+<p>To be able to switch between front face and back face culling, you have to change pipeline states. And those changes can be expensive.</p>
+</blockquote>
+
+<p>There is another render target generated in this stage for the bloom effect.
+This target stores the intensity of bloom.
+As you can see in the picture, translucent objects glow more.</p>
+
+<p><img src="/img/bloommask.jpg" alt="BloomMask" />
+<em>Bloom intensity target: <code>R8_UNORM</code></em></p>
+
+<blockquote>
+<p>Note that the bloom intensity increases at far distances to get more glow in foggy areas.</p>
+</blockquote>
+
+<h3 id="post-processing">Post processing</h3>
+
+<p>This is the stage where temporal antialiasing, bloom, motion blur, depth of field, and other effects are executed.
+I am planning for another blog post just for post processing.
+So, I won't talk about much in here but I want to talk a little bit about the bloom.
+There is already glow of lights on the main render target thanks to volumetric lighting.</p>
+
+<p>RDR2 bloom implementation is very similar to the implementation described in <a href="https://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare" target="_blank">Next Generation Post Processing in Call of Duty: Advanced Warfare</a>.</p>
+
+<ul>
+<li>Non-thresholded target as input,</li>
+<li><code>R11G11B10_FLOAT</code> 7-mip render target,</li>
+<li>13-bilinear-tap filter on downsampling, 3x3 tent filter on upscaling.</li>
+</ul>
+
+<p>Then the game combines this filtered bloom target with the main target along with the bloom intensity target.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>What a quite ride! There is so much more to talk about but I don't want this blog to be too long.
+I'd like to share my conclusions about all of this and some odd things that I've found along the way.</p>
+
+<ul>
+<li>The first thing I noticed is that this game does a lot of compute to graphics switches and vice versa.
+It uses async compute if you enable. (You can't enable async compute on in-game settings. You have to enable it from the game's config file)
+For example, just for bloom effect; the game switches to compute and does some work, then switches back to graphics and does downsampling,
+then switches back to compute for some other work and switches back to graphics again for upsampling. Aren't these &quot;switches&quot; expensive on GPUs?
+Does the gain from compute justify the cost of switches?</li>
+<li>Another thing is that RDR2 clears most of the textures. This is strange because games generally avoid unnecessary texture clears(e.g. clearing GBuffers).
+Do these &quot;texture clears&quot; have a real impact on performance? Do they need to clear these textures?</li>
+<li>Another odd thing is that; There are 3 (maybe more) same depth downsample pass in one frame. One for SSAO, another for SSR, and another for volumetric fog and light shaft generation stage. Why the game doesn't use the downsampled depth target from SSAO for other stages?</li>
+</ul>
+
+<p>Don't get me wrong, I don't blame anyone here (Well... I'm little upset about low framerates),
+I'm trying to understand why these decisions were made.
+After all, lots of talented people <a href="https://kotaku.com/inside-rockstar-games-culture-of-crunch-1829936466" target="_blank">crunched hard</a> on this game.
+It is likely that they didn't have enough time to optimize the game further.</p>
+
+<h2 id="last-words">Last words</h2>
+
+<p>Well, that's it! RDR2 is a gorgeous game to look at. Not just for graphics techniques but the art, the lighting, everything looks phenomenal.
+I've fallen love with the color palette of this game.
+Especially at night times, it reminds me of The Assassination of Jesse James by the Coward Robert Ford, No Country for Old Men, and other western movies that shot with 35mm cameras.</p>
+
+<p>If you find anything that is wrong or can be improved, please feel free to contact me.
+I will update this article when I got more information. Please, comment, share and enjoy.</p>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>2649 Words</p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-06-19 19:15 &#43;0300</p>
+        </div>
+
+        
+            <div class="pagination">
+                <div class="pagination__title">
+                    <span class="pagination__title-h"></span>
+                    <hr />
+                </div>
+
+                <div class="pagination__buttons">
+                    
+
+                    
+                        <span class="button next">
+                            <a href="https://imgeself.github.io/posts/2019-07-28-raytracer-7-simd-rectangles/">
+                                <span class="button__text">Raytracer 7: SIMD Rectangles</span>
+                                <span class="button__icon">→</span>
+                            </a>
+                        </span>
+                    
+                </div>
+            </div>
+        
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2020</span>
+            
+            
+            <span> <a href="https://imgeself.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="/bundle.min.dc716e9092c9820b77f96da294d0120aeeb189b5bcea9752309ebea27fd53bbe6b13cffb2aca8ecf32525647ceb7001f76091de4199ac5a3caa432c070247f5b.js" integrity="sha512-3HFukJLJggt3&#43;W2ilNASCu6xibW86pdSMJ6&#43;on/VO75rE8/7KsqOzzJSVkfOtwAfdgkd5BmaxaPKpDLAcCR/Ww=="></script>
+
+
+
+    </body>
+</html>

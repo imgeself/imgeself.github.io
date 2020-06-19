@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Last time, we finished our GPU port. That is very valuable because GPUs are so fast, we can iterate faster when prototyping new techniques. And we implemented emissive materials. We can make spheres that emit light. Now, I want to make rectangles that emit light too. Also, rectangles will make us one step closer to the Cornell Box implementation.
+Axis-Aligned Rectangle Axis aligned rectangles are easier to implement. We can start here." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://imgeself.github.io/posts/2019-07-20-raytracer-6-rectangles-cornell/" />
+
+
+    <title>
+        
+            Raytracer 6: Rectangles, Cornell Box :: Dear World, 
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.3be786f7e7db164c2f02fff303c9f011f026f3df1f61a2ce993b4c5005163bcd.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Raytracer 6: Rectangles, Cornell Box">
+<meta itemprop="description" content="Last time, we finished our GPU port. That is very valuable because GPUs are so fast, we can iterate faster when prototyping new techniques. And we implemented emissive materials. We can make spheres that emit light. Now, I want to make rectangles that emit light too. Also, rectangles will make us one step closer to the Cornell Box implementation.
+Axis-Aligned Rectangle Axis aligned rectangles are easier to implement. We can start here.">
+<meta itemprop="datePublished" content="2019-07-23T17:30:51&#43;03:00" />
+<meta itemprop="dateModified" content="2019-07-23T17:30:51&#43;03:00" />
+<meta itemprop="wordCount" content="1534">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Raytracer 6: Rectangles, Cornell Box"/>
+<meta name="twitter:description" content="Last time, we finished our GPU port. That is very valuable because GPUs are so fast, we can iterate faster when prototyping new techniques. And we implemented emissive materials. We can make spheres that emit light. Now, I want to make rectangles that emit light too. Also, rectangles will make us one step closer to the Cornell Box implementation.
+Axis-Aligned Rectangle Axis aligned rectangles are easier to implement. We can start here."/>
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2019-07-23 17:30:51 &#43;0300 &#43;03" />
+
+
+
+
+
+
+
+
+    </head>
+
+    <body class="dark-theme">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">echo &#34;Dear World,</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://imgeself.github.io/about/">About</a></li><li><a href="https://imgeself.github.io/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle unselectable"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.0/dist/katex.min.css" integrity="sha384-BdGj8xC2eZkQaxoQ8nSLefg4AV4/AwB3Fj+8SUSo7pnKP6Eoy18liIKTPn9oBYNG" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.0/dist/katex.min.js" integrity="sha384-JiKN5O8x9Hhs/UE5cT5AAJqieYlOZbGT3CHws/y97o3ty4R7/O5poG9F3JoiOYw1" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.0/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>8 minutes
+
+            
+
+            </p>
+        </div>
+
+        <article>
+            <h1 class="post-title">
+                <a href="https://imgeself.github.io/posts/2019-07-20-raytracer-6-rectangles-cornell/">Raytracer 6: Rectangles, Cornell Box</a>
+            </h1>
+
+            
+
+            <div class="post-content">
+                <p>Last time, we finished our GPU port. That is very valuable because GPUs are so fast, we can iterate faster when prototyping new techniques.
+And we implemented emissive materials. We can make spheres that emit light. Now, I want to make rectangles that emit light too.
+Also, rectangles will make us one step closer to the Cornell Box implementation.</p>
+
+<h2 id="axisaligned-rectangle">Axis-Aligned Rectangle</h2>
+
+<p>Axis aligned rectangles are easier to implement. We can start here. Axis aligned rectangles like small rectangle part of cartesian axis plane.
+We can adjust its size and distance. But we can't rotate them because it's axis-aligned. Let's implement one and look at what it's capable of.</p>
+
+<p>We define an XY plane aligned rectangle like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">RectangleXY</span> {
+    <span style="color:#75715e">// NOTE: z components of this vector should be same. Because both of them is in XY plane
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Bottom-left point of rectangle
+</span><span style="color:#75715e"></span>    Vector3 minPoint;
+    <span style="color:#75715e">// Upper-right point of rectangle
+</span><span style="color:#75715e"></span>    Vector3 maxPoint;
+};
+</code></pre></div>
+<p>Since we have constant <span  class="math">\(z\)</span> value for the rectangle, we can easily solve the intersection equation.</p>
+
+<p><span  class="math">\[ \text{Ray equation} : P = O + t*\vec D \implies P_z = O_z + t*\vec D_z \]</span></p>
+
+<p>We know <span  class="math">\(P_z\)</span> value is the z component of the rectangle. We can find <span  class="math">\(t\)</span> with little bit arrangement:</p>
+
+<p><span  class="math">\[ t = (P_z - O_z) / \vec D_z \]</span></p>
+
+<p>We can put <span  class="math">\(t\)</span> value in the ray equation and calculate a point. Then we can check x and y components of the point to see if it's in the rectangle's area.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// z value of rectangle
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">float</span> rectZ <span style="color:#f92672">=</span> rect.minPoint.z;
+
+<span style="color:#66d9ef">float</span> t <span style="color:#f92672">=</span> (rectZ <span style="color:#f92672">-</span> ray<span style="color:#f92672">-&gt;</span>origin.z) <span style="color:#f92672">/</span> ray<span style="color:#f92672">-&gt;</span>direction.z;
+Vector3 hitPoint <span style="color:#f92672">=</span> ray<span style="color:#f92672">-&gt;</span>origin <span style="color:#f92672">+</span> ray<span style="color:#f92672">-&gt;</span>direction <span style="color:#f92672">*</span> t;
+
+<span style="color:#66d9ef">bool</span> hit <span style="color:#f92672">=</span> hitVector.x <span style="color:#f92672">&lt;=</span> rect.maxPoint.x <span style="color:#f92672">&amp;&amp;</span> hitVector.x <span style="color:#f92672">&gt;=</span> rect.minPoint.x <span style="color:#f92672">&amp;&amp;</span>
+           hitVector.y <span style="color:#f92672">&lt;=</span> rect.maxPoint.y <span style="color:#f92672">&amp;&amp;</span> hitVector.y <span style="color:#f92672">&gt;=</span> rect.minPoint.y;
+</code></pre></div>
+<p>Now, rectangle intersection code is ready but we need to calculate normal vector too.
+So, if a rectangle is aligned with the XY plane normal vector should towards the camera. In our case, the normal vector should be <code>Vector3(0.0f, 0.0f, 1.0f)</code>.
+And this is what we get:</p>
+
+<p><figure><img src="/img/first-rectangle.png" alt="First Rectangle"></figure></p>
+
+<p>What a success! We have a rectangle in our scene but something is off. Look at the reflection of the rectangle on the mirror sphere.
+The backside of the rectangle looks like the same as the front side of the rectangle. That is not correct because no lights are reaching on there.
+It should be darker. This has happened because we have used one normal vector for both sides. So, we need a little more smart way to calculate the normal vector.</p>
+
+<p>Normal vector and incident ray direction vector should point opposite ways.
+Our general normal vector <code>Vector3(0.0f, 0.0f, 1.0f)</code> is okay if incident ray coming towards from the camera. But if it's coming towards the camera,
+the normal vector should be flipped.</p>
+
+<p>So, we need to determine these vectors are points the same direction or not.
+Since we have an axis-aligned rectangle, we can determine with a single dot product between incident ray direction and normal vector which points towards the camera.
+If the result of the dot product is negative, that means they are pointing in opposite directions. If the result is positive, they are pointing in the same direction. We don't want that.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Vector3 positiveZ <span style="color:#f92672">=</span> Vector3(<span style="color:#ae81ff">0.0f</span>, <span style="color:#ae81ff">0.0f</span>, <span style="color:#ae81ff">1.0f</span>);
+<span style="color:#66d9ef">float</span> dot <span style="color:#f92672">=</span> DotProduct(ray<span style="color:#f92672">-&gt;</span>direction, positiveZ);
+<span style="color:#66d9ef">if</span> (dot <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+    <span style="color:#75715e">// They are pointing in same direction
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// Normal vector should be flipped
+</span><span style="color:#75715e"></span>    hitNormal <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>positiveZ;
+} <span style="color:#66d9ef">else</span> {
+    hitNormal <span style="color:#f92672">=</span> positiveZ;
+}
+</code></pre></div>
+<p><figure><img src="/img/correct-rectangle.png" alt="Correct Rectangle"></figure></p>
+
+<p>That looks more correct image.
+Now we can apply all types of material types to the rectangle.
+Here is a rectangle with emissive material applied:</p>
+
+<p><figure><img src="/img/emit-rectangle.png" alt="Emit Rectangle"></figure></p>
+
+<h2 id="oriented-rectangles">Oriented Rectangles</h2>
+
+<p>So, that is cool but what if I want to rotate this light 90 degrees for making it like toplight.
+For that, I have to make an XZ plane aligned rectangle and write it's intersection code. What if I want to rotate 45 degrees? That is no option at all.</p>
+
+<p>But what if we pretend like the rectangle already rotated and able to make intersection test, we rotate back to XY plane with incident ray and make hit test.
+That will work actually. Because we will not rotate the rectangle, we will rotate the incident ray.
+When I implemented this, I didn't know that this &quot;Instead of rotating objects, rotate the rays&quot; technique was used a lot in renderers.</p>
+
+<p>When you using game engine editors, you create objects like spheres, etc. Then you start to move them around and rotate them maybe. That transform values are kept in matrices.
+And all the objects you created, still bounds to the world's origin point. You just specify how it's position far from the origin point of the world.
+This is what we are going to do. (We are not gonna do editor or something like that yet)
+We are going to create rectangles on the origin point and aligned with the XY plane. Then we are going to change it's transformation using matrices.
+On the intersection code, we are going to inverse the transformation operations.</p>
+
+<p>For that, we need a 4D vector and 4x4 matrix classes. <a href="https://github.com/imgeself/raytracer/commit/ed4f5d3668f92f3cdc6911f8e5b64a54348c4c15">(Commit)</a>. Now, rectangle struct will be like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#75715e">// XY plane axis-aligned rectangle
+</span><span style="color:#75715e">// RULE: Default Rectangle are 2 unit square and it&#39;s center point always on the origin.
+</span><span style="color:#75715e">// Use transform matrices to manupilate position, scale and orientation.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> Vector3 rectDefaultMinPoint{ <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0f</span>, <span style="color:#f92672">-</span><span style="color:#ae81ff">1.0f</span>, <span style="color:#ae81ff">0.0f</span> };
+<span style="color:#66d9ef">static</span> <span style="color:#66d9ef">const</span> Vector3 rectDefaultMaxPoint{  <span style="color:#ae81ff">1.0f</span>,  <span style="color:#ae81ff">1.0f</span>, <span style="color:#ae81ff">0.0f</span> };
+<span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">RectangleXY</span> {
+    Matrix4 scaleMatrix;
+    Matrix4 translateMatrix;
+    Matrix4 rotationMatrix;
+};
+</code></pre></div>
+<p>We will adjust these matrices in the <code>CreateScene</code> function. In <code>IntesectWorld</code> function, we are multiplying these matrices with default points:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Matrix4 scaleTranslateMatrix <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>translateMatrix <span style="color:#f92672">*</span> rect<span style="color:#f92672">-&gt;</span>scaleMatrix;
+<span style="color:#75715e">// These are the transformed rectangle points that we will use on hit testing.
+</span><span style="color:#75715e"></span>Vector3 minPoint <span style="color:#f92672">=</span> (scaleTranslateMatrix <span style="color:#f92672">*</span> Vector4(rectDefaultMinPoint, <span style="color:#ae81ff">1.0f</span>)).xyz();
+Vector3 maxPoint <span style="color:#f92672">=</span> (scaleTranslateMatrix <span style="color:#f92672">*</span> Vector4(rectDefaultMaxPoint, <span style="color:#ae81ff">1.0f</span>)).xyz();
+
+<span style="color:#75715e">// Hit testing
+</span></code></pre></div>
+<p>So far so good, we are rendering the same scene with matrices. But our goal is to rotate the rectangles, let's implement that.
+Like I said before, we will not rotate the rectangle, we will rotate the incident ray.
+So all I need is invert rectangle's rotation matrix and multiply with incident ray.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Matrix4 rayMatrix <span style="color:#f92672">=</span> Inverse(rect<span style="color:#f92672">-&gt;</span>rotationMatrix);
+<span style="color:#75715e">// Transform ray
+</span><span style="color:#75715e">// If a Vector3 represent a point; while we converting it to the Vector4, we set component w to 1.
+</span><span style="color:#75715e">// If a Vector3 represent a vector; while we converting it to the Vector4, we set component w to 0.
+</span><span style="color:#75715e"></span>Vector3 rayOrigin <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> Vector4(ray<span style="color:#f92672">-&gt;</span>origin, <span style="color:#ae81ff">1.0f</span>)).xyz();
+Vector3 rayDirection <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> Vector4(ray<span style="color:#f92672">-&gt;</span>direction, <span style="color:#ae81ff">0.0f</span>)).xyz();
+</code></pre></div>
+<p>And we get this:</p>
+
+<p><figure><img src="/img/word-90-rotate.png" alt="RotatoWorld90"></figure></p>
+
+<p>It rotated 90 degrees but around world origin. I want to rotate around its origin. So we need to translate back origin, rotate, and translate again:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++">Matrix4 rayMatrix <span style="color:#f92672">=</span> rect<span style="color:#f92672">-&gt;</span>translateMatrix <span style="color:#f92672">*</span> Inverse(rect<span style="color:#f92672">-&gt;</span>rotationMatrix) <span style="color:#f92672">*</span> Inverse(rect<span style="color:#f92672">-&gt;</span>translateMatrix);
+</code></pre></div>
+<p>Now we get what we wanted:</p>
+
+<p><figure><img src="/img/90-rotate.png" alt="Rotate90"></figure></p>
+
+<p>Execution time is 3 times slower now and we have just one rectangle in the scene. We need to optimize this process.
+At least we have flexible rectangles. Now, I think it's time! Oh yeah, Cornell Box!</p>
+
+<h2 id="cornell-box">Cornell Box</h2>
+
+<p>We are going to need a lot of rectangles for the Cornell Box scene. So I've started to write some helper functions for creating rectangles.
+We need box types also. Boxes are essentially a shape which has 6 rectangles for faces. And the scene needs 2 boxes and 6 rectangles.
+5 for the walls and 1 for the top light. After writing little bit boilerplate code we get this:</p>
+
+<p><figure><img src="/img/cornell.png" alt="Cornell"></figure></p>
+
+<p>Yeah! It works! But this 512 spp image rendered in 10 minutes. Our raytracer is way slower now.
+Let's make some optimizations or should I say; fix stupid thigs.</p>
+
+<p>So, the first one is obvious, right? Why we have a scale, translate and rotation matrices are stored separately.
+We can combine them into one transform matrix and use it's inverse for transforming rays.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">RectangleXY</span> {
+    Matrix4 transformMatrix;
+    <span style="color:#75715e">// We keep rotation matrix seperate as well because we are using this for rotating the rectangle normal.
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">// TODO: Instead of keeping rotation matrix, why not keep normal vector itself?
+</span><span style="color:#75715e"></span>    Matrix4 rotationMatrix;
+    <span style="color:#66d9ef">uint32_t</span> materialIndex;
+};
+</code></pre></div>
+<p>With this improvement, our intersection code is now simpler. We don't transform rectangle coordinates at all. Now, we are only transforming incident rays.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">for</span> every rectangle:
+    RectangleXY<span style="color:#f92672">*</span> rect <span style="color:#f92672">=</span> world<span style="color:#f92672">-&gt;</span>rectangles <span style="color:#f92672">+</span> rectangleIndex;
+
+    Matrix4 rayMatrix <span style="color:#f92672">=</span> Inverse(rect<span style="color:#f92672">-&gt;</span>transformMatrix);
+    Vector3 rayOrigin <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> Vector4(ray<span style="color:#f92672">-&gt;</span>origin, <span style="color:#ae81ff">1.0f</span>)).xyz();
+    Vector3 rayDirection <span style="color:#f92672">=</span> (rayMatrix <span style="color:#f92672">*</span> Vector4(ray<span style="color:#f92672">-&gt;</span>direction, <span style="color:#ae81ff">0.0f</span>)).xyz();
+
+    ... Hit testing ...
+</code></pre></div>
+<p>There are lots of things to optimize this code. For example, we only need an inverted version of the transform matrix.
+Why don't we invert the transformation matrix on the initialization stage and put that in rectangle struct? We will do further performance improvements in the next post.</p>
+
+<p>Also, in every Cornell Box scene, those two boxes are little rotated.
+So I've <a href="https://github.com/imgeself/raytracer/commit/dfdf5aa8a4f6e06fe3a3e7f0308fba4999fcbb2d">added</a> a helper function to rotate boxes and we get this:</p>
+
+<p><figure><img src="/img/correct-cornell.png" alt="CornellRotated"></figure></p>
+
+<h2 id="learnings-and-whats-next">Learnings and what's next</h2>
+
+<p>The most valuable thing I learned when implementing these features is that instead of transform scene objects, we can transform the incident ray.
+This way is easier in some cases. Like rectangles in our case.</p>
+
+<p>I've implemented this rectangle support first in GPU but I haven't finished yet.
+Next, we will be doing some optimizations, SIMD rectangles maybe? And we will finish our GPU implementation as well.</p>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1534 Words</p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2019-07-23 17:30 &#43;0300</p>
+        </div>
+
+        
+            <div class="pagination">
+                <div class="pagination__title">
+                    <span class="pagination__title-h"></span>
+                    <hr />
+                </div>
+
+                <div class="pagination__buttons">
+                    
+                        <span class="button previous">
+                            <a href="https://imgeself.github.io/posts/2019-07-28-raytracer-7-simd-rectangles/">
+                                <span class="button__icon">←</span>
+                                <span class="button__text">Raytracer 7: SIMD Rectangles</span>
+                            </a>
+                        </span>
+                    
+
+                    
+                        <span class="button next">
+                            <a href="https://imgeself.github.io/posts/2019-06-26-raytracer-5-gpu-opengl/">
+                                <span class="button__text">Raytracer 5: GPU, OpenGL and Compute Shaders</span>
+                                <span class="button__icon">→</span>
+                            </a>
+                        </span>
+                    
+                </div>
+            </div>
+        
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2020</span>
+            
+            
+            <span> <a href="https://imgeself.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="/bundle.min.dc716e9092c9820b77f96da294d0120aeeb189b5bcea9752309ebea27fd53bbe6b13cffb2aca8ecf32525647ceb7001f76091de4199ac5a3caa432c070247f5b.js" integrity="sha512-3HFukJLJggt3&#43;W2ilNASCu6xibW86pdSMJ6&#43;on/VO75rE8/7KsqOzzJSVkfOtwAfdgkd5BmaxaPKpDLAcCR/Ww=="></script>
+
+
+
+    </body>
+</html>

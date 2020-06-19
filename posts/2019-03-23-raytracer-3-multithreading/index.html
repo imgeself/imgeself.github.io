@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Last post, we implemented a custom random number generator. And we got 21.0 Mray/s, 0.000048 ms/ray on my laptop. So lets try to improve performance more.
+You might have seen this famous image before which taken from here. What this image tells us is that even transistor count still increasing linearly, processors not getting faster anymore like used to be. But on the other hand, when the single threaded performance speed of acceleration starts to drop, the number of logical core count begins to increase." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://imgeself.github.io/posts/2019-03-23-raytracer-3-multithreading/" />
+
+
+    <title>
+        
+            Raytracer 3: Multithreading :: Dear World, 
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.3be786f7e7db164c2f02fff303c9f011f026f3df1f61a2ce993b4c5005163bcd.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Raytracer 3: Multithreading">
+<meta itemprop="description" content="Last post, we implemented a custom random number generator. And we got 21.0 Mray/s, 0.000048 ms/ray on my laptop. So lets try to improve performance more.
+You might have seen this famous image before which taken from here. What this image tells us is that even transistor count still increasing linearly, processors not getting faster anymore like used to be. But on the other hand, when the single threaded performance speed of acceleration starts to drop, the number of logical core count begins to increase.">
+<meta itemprop="datePublished" content="2019-03-23T16:32:32&#43;03:00" />
+<meta itemprop="dateModified" content="2019-03-23T16:32:32&#43;03:00" />
+<meta itemprop="wordCount" content="987">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Raytracer 3: Multithreading"/>
+<meta name="twitter:description" content="Last post, we implemented a custom random number generator. And we got 21.0 Mray/s, 0.000048 ms/ray on my laptop. So lets try to improve performance more.
+You might have seen this famous image before which taken from here. What this image tells us is that even transistor count still increasing linearly, processors not getting faster anymore like used to be. But on the other hand, when the single threaded performance speed of acceleration starts to drop, the number of logical core count begins to increase."/>
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2019-03-23 16:32:32 &#43;0300 &#43;03" />
+
+
+
+
+
+
+
+
+    </head>
+
+    <body class="dark-theme">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">echo &#34;Dear World,</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://imgeself.github.io/about/">About</a></li><li><a href="https://imgeself.github.io/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle unselectable"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>5 minutes
+
+            
+
+            </p>
+        </div>
+
+        <article>
+            <h1 class="post-title">
+                <a href="https://imgeself.github.io/posts/2019-03-23-raytracer-3-multithreading/">Raytracer 3: Multithreading</a>
+            </h1>
+
+            
+
+            <div class="post-content">
+                
+
+<p>Last post, we implemented a custom random number generator.
+And we got <strong>21.0 Mray/s, 0.000048 ms/ray</strong> on my laptop.
+So lets try to improve performance more.</p>
+
+<p><img src="https://www.karlrupp.net/wp-content/uploads/2015/06/40-years-processor-trend.png" alt="CPU" /></p>
+
+<p>You might have seen this famous image before which taken from <a href="https://www.karlrupp.net/2015/06/40-years-of-microprocessor-trend-data/" target="_blank">here</a>. What this image tells us is that even transistor count
+still increasing linearly, processors not getting faster anymore like used to be.
+But on the other hand, when the single threaded performance speed of acceleration starts to drop,
+the number of logical core count begins to increase.</p>
+
+<p>So the lesson I got here is that if you write a single-threaded program, you will not get much
+a performance on new processors. You need to use cpu cores to get much more performance on new processors.
+That's what I'm gonna try to do right now.</p>
+
+<h2 id="utilizing-the-cpu-cores">Utilizing the CPU cores</h2>
+
+<p>For utilizing CPU threads, we need some way to break our program into pieces. And that's a very hard problem.
+If you figure out how to break your program into pieces, then you have to figure out how to synchronize them.
+But we are lucky! Raytracer is easily breakable into chunks. We are calculating image pixels.
+And every pixel independent to others. We won't have much trouble with synchronization.
+The cores going to render image pixels with independent to others.
+After finishing all the pixels, we going to write the output image.</p>
+
+<h2 id="lock-free-programming">&quot;Lock-free&quot; programming</h2>
+
+<p>I read a document about <a href="https://docs.microsoft.com/en-us/windows/desktop/DxTechArts/lockless-programming" target="_blank">lockless programming</a>.
+It's talk about problems about multithreading, how compilers and processors behave, how console CPUs differs from PC CPUs, etc.
+It's talk about around Windows API but all of the things are valid in other platforms too.
+I want to implement multithreading using atomics for synchronization so that threads not will be blocked.
+It's generally easier using locks instead of atomic instructions like document says.
+But I think in this project, atomic instructions will not be that hard. So I will give a shot.</p>
+
+<h2 id="implementing">Implementing</h2>
+
+<p>Let's try to divide our program into pieces. My laptop has 4 threads.
+If we can divide image to thread count and give each thread a piece, we can render image 4 times faster, right?
+Umm, sadly no! As you can see in the image below, if we divide image to the thread count,
+thread 2, will do the most part of the work, and thread 1, 3, 4 will wait for the thread 2 after finishing its job.
+This is not efficient and it's almost same as using single-thread in this case.</p>
+
+<p><img src="/img/thread_parts.png" alt="Parts" /></p>
+
+<p>So how do we divide work evenly to all threads? The answer is simple. We divide the image into more parts.
+All threads execute its task and switch to other tasks in the work queue immediately.
+So that way if a thread gets a long-running job, other threads will be busy for executing other jobs.
+A good visual explanation for this problem is <a href="https://developer.apple.com/videos/play/wwdc2017/706/?time=345" target="_blank">here</a>.</p>
+
+<p>For the implementing first I created a thread for every row on the image.
+Then I used <a href="https://en.wikipedia.org/wiki/Grand_Central_Dispatch" target="_blank">Apple GCD</a>.
+You can easily multithread your loop using the <code>dispatch_apply</code> function.
+It uses all threads and waits all to be finished. So there is no need for synchronization.
+GCD automatically does for us. It is a really easy and perfect fit for our program.
+You can see the GCD implementation <a href="https://github.com/imgeself/raytracer/blob/gcd-threading/main.cpp" target="_blank">here</a>.</p>
+
+<p>But I ended up using a simple work queue method from <a href="https://www.youtube.com/watch?v=ZAeU3Z0PmcU" target="_blank">Handmade Ray</a>.
+We create work orders and put them into a queue.
+Then every thread looping through the queue and executing waiting jobs.
+If there is no job to be executed, we release the thread. I think it's a easy, understandable and flexible method.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c++" data-lang="c++"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">WorkOrder</span> {
+    Image<span style="color:#f92672">*</span> image;
+    World<span style="color:#f92672">*</span> world;
+    <span style="color:#66d9ef">uint32_t</span> startRowIndex;
+    <span style="color:#66d9ef">uint32_t</span> endRowIndex;
+    <span style="color:#66d9ef">uint32_t</span> sampleSize;
+    <span style="color:#66d9ef">uint32_t</span><span style="color:#f92672">*</span> randomState;
+};
+
+<span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">WorkQueue</span> {
+    <span style="color:#66d9ef">uint32_t</span> workOrderCount;
+    WorkOrder<span style="color:#f92672">*</span> workOrders;
+
+    <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">uint64_t</span> nextOrderToDo;
+    <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">uint64_t</span> finishedOrderCount;
+    <span style="color:#66d9ef">volatile</span> <span style="color:#66d9ef">uint64_t</span> totalBouncesComputed;
+};
+
+<span style="color:#66d9ef">bool</span> <span style="color:#a6e22e">RaytraceWork</span>(WorkQueue<span style="color:#f92672">*</span> workQueue) {
+    <span style="color:#66d9ef">uint32_t</span> nextOrderToDo <span style="color:#f92672">=</span> InterlockedAddAndReturnPrevious(<span style="color:#f92672">&amp;</span>workQueue<span style="color:#f92672">-&gt;</span>nextOrderToDo, <span style="color:#ae81ff">1</span>);
+    <span style="color:#66d9ef">if</span> (nextOrderToDo <span style="color:#f92672">&gt;=</span> workQueue<span style="color:#f92672">-&gt;</span>workOrderCount) {
+        <span style="color:#66d9ef">return</span> false;
+    }
+
+    fetch the next WorkOrder
+
+    ...
+    <span style="color:#66d9ef">do</span> the raytracing
+    ...
+
+    InterlockedAddAndReturnPrevious(<span style="color:#f92672">&amp;</span>workQueue<span style="color:#f92672">-&gt;</span>totalBouncesComputed, totalBounces);
+    InterlockedAddAndReturnPrevious(<span style="color:#f92672">&amp;</span>workQueue<span style="color:#f92672">-&gt;</span>finishedOrderCount, <span style="color:#ae81ff">1</span>);
+    <span style="color:#66d9ef">return</span> true;
+}
+</code></pre></div>
+<p>And we get 1.3x speedup from 4 threads. Hmm, not what I expected.</p>
+
+<h2 id="problems">Problems</h2>
+
+<p>I put the random state pointer in the <code>WorkOrder</code> struct. And it's shared across all threads.
+But random number generator changes the value of the state. But writing the shared data in a thread is a dangerous thing.
+As <a href="https://twitter.com/rygorous" target="_blank">rygorous</a> pointed at his blog:
+<a href="https://fgiesen.wordpress.com/2013/01/31/cores-dont-like-to-share/" target="_blank">Cores don’t like to share</a>.
+After you write shared data, other threads must throw all the work,
+fetch the actual value of the variable because the cached version of data not valid anymore,
+then start it's work over. This is often calling <a href="https://www.youtube.com/watch?v=WDIkqP4JbkE" target="_blank">&quot;false sharing&quot;</a>.</p>
+
+<p>So I put the random state in thread locally. So every thread writes its own random state.
+After implementing this simple change we get 2x speedup. Not bad!</p>
+
+<p>There is another data that shared across all threads and we are writing in it.
+<code>totalBouncesComputed</code> is a number of total bounce count that we use for measuring our program.
+We are adding the number of bounces calculated on every pixel. We are doing in every sample.
+I added a local variable for total bounce number, then added it to <code>totalBouncesComputed</code>.
+Instead of incrementing hundreds of per work order, we going to do once.
+After implementing this change we get 2.3x speedup. See the commit <a href="https://github.com/imgeself/raytracer/commit/ba3fe88926c3036bc616a3e238fa721c03f9ad86" target="_blank">here</a>.</p>
+
+<h2 id="performance">Performance</h2>
+
+<p>Let's look at how much speed we gain from threads:</p>
+
+<p><img src="/img/speed-graph.png" alt="Chart" /></p>
+
+<p>So when we use second thread, we speed up linearly, almost 2x. This makes sense on 2 core, 4 thread CPU.
+But we did not speed up linearly after using third and fourth thread.
+This means we did not gain much from <a href="https://en.wikipedia.org/wiki/Hyper-threading" target="_blank">hyper-threading</a>.
+Honestly, I don't really know how to fine-tune and properly use of hyper-threading.
+So it's subject for future posts I guess.</p>
+
+<p>At the end we got <strong>49.2 Mray/s, 0.000020 ms/ray</strong>. Can we improve the performance more?
+I will try to using SIMD for more performance in the next post.</p>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>987 Words</p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2019-03-23 16:32 &#43;0300</p>
+        </div>
+
+        
+            <div class="pagination">
+                <div class="pagination__title">
+                    <span class="pagination__title-h"></span>
+                    <hr />
+                </div>
+
+                <div class="pagination__buttons">
+                    
+                        <span class="button previous">
+                            <a href="https://imgeself.github.io/posts/2019-04-30-raytracer-4-simd/">
+                                <span class="button__icon">←</span>
+                                <span class="button__text">Raytracer 4: SIMD</span>
+                            </a>
+                        </span>
+                    
+
+                    
+                        <span class="button next">
+                            <a href="https://imgeself.github.io/posts/2019-02-26-raytracer-2-custom-random-function/">
+                                <span class="button__text">Raytracer 2: Custom Random Number Generator Function</span>
+                                <span class="button__icon">→</span>
+                            </a>
+                        </span>
+                    
+                </div>
+            </div>
+        
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2020</span>
+            
+            
+            <span> <a href="https://imgeself.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="/bundle.min.dc716e9092c9820b77f96da294d0120aeeb189b5bcea9752309ebea27fd53bbe6b13cffb2aca8ecf32525647ceb7001f76091de4199ac5a3caa432c070247f5b.js" integrity="sha512-3HFukJLJggt3&#43;W2ilNASCu6xibW86pdSMJ6&#43;on/VO75rE8/7KsqOzzJSVkfOtwAfdgkd5BmaxaPKpDLAcCR/Ww=="></script>
+
+
+
+    </body>
+</html>
