@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="author" content="">
-<meta name="description" content="In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers: - Previous scene with 8 spheres: 0.00009 ms/ray - Cornell Box: 0.00132 ms/ray
-We need to optimize rectangle intersection testing.
+<meta name="description" content="In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers:
+ Previous scene with 8 spheres: 0.00009 ms/ray Cornell Box: 0.00132 ms/ray  We need to optimize rectangle intersection testing.
 Don&#39;t do anything more than you need to do I hinted this in the last post. We have to get rid of matrix inverse function in the IntersectWorld function because it&#39;s too heavy." />
 <meta name="keywords" content="" />
 <meta name="robots" content="noodp" />
@@ -35,20 +35,20 @@ Don&#39;t do anything more than you need to do I hinted this in the last post. W
 
 
 <meta itemprop="name" content="Raytracer 7: SIMD Rectangles">
-<meta itemprop="description" content="In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers: - Previous scene with 8 spheres: 0.00009 ms/ray - Cornell Box: 0.00132 ms/ray
-We need to optimize rectangle intersection testing.
+<meta itemprop="description" content="In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers:
+ Previous scene with 8 spheres: 0.00009 ms/ray Cornell Box: 0.00132 ms/ray  We need to optimize rectangle intersection testing.
 Don&#39;t do anything more than you need to do I hinted this in the last post. We have to get rid of matrix inverse function in the IntersectWorld function because it&#39;s too heavy.">
 <meta itemprop="datePublished" content="2019-07-26T15:15:51&#43;03:00" />
 <meta itemprop="dateModified" content="2019-07-26T15:15:51&#43;03:00" />
-<meta itemprop="wordCount" content="755">
+<meta itemprop="wordCount" content="753">
 
 
 
 <meta itemprop="keywords" content="" />
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Raytracer 7: SIMD Rectangles"/>
-<meta name="twitter:description" content="In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers: - Previous scene with 8 spheres: 0.00009 ms/ray - Cornell Box: 0.00132 ms/ray
-We need to optimize rectangle intersection testing.
+<meta name="twitter:description" content="In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers:
+ Previous scene with 8 spheres: 0.00009 ms/ray Cornell Box: 0.00132 ms/ray  We need to optimize rectangle intersection testing.
 Don&#39;t do anything more than you need to do I hinted this in the last post. We have to get rid of matrix inverse function in the IntersectWorld function because it&#39;s too heavy."/>
 
 
@@ -138,9 +138,12 @@ Don&#39;t do anything more than you need to do I hinted this in the last post. W
                 
 
 <p>In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now.
-Let's look at some numbers:
- - Previous scene with 8 spheres: <strong>0.00009 ms/ray</strong>
- - Cornell Box: <strong>0.00132 ms/ray</strong></p>
+Let's look at some numbers:</p>
+
+<ul>
+<li>Previous scene with 8 spheres: <strong>0.00009 ms/ray</strong></li>
+<li>Cornell Box: <strong>0.00132 ms/ray</strong></li>
+</ul>
 
 <p>We need to optimize rectangle intersection testing.</p>
 
@@ -268,7 +271,7 @@ Here is the Cornell Box scene rendered with 8000 samples per pixel:</p>
 
         <div class="post-info">
 
-            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>755 Words</p>
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>753 Words</p>
 
             <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2019-07-26 15:15 &#43;0300</p>
         </div>
@@ -285,7 +288,7 @@ Here is the Cornell Box scene rendered with 8000 samples per pixel:</p>
                         <span class="button previous">
                             <a href="https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/">
                                 <span class="button__icon">←</span>
-                                <span class="button__text">Studying rendering of Red Dead Redemption 2</span>
+                                <span class="button__text">Graphics Study: Red Dead Redemption 2</span>
                             </a>
                         </span>
                     

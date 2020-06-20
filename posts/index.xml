@@ -9,7 +9,7 @@
         <atom:link href="https://imgeself.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
         
         <item>
-            <title>Studying rendering of Red Dead Redemption 2</title>
+            <title>Graphics Study: Red Dead Redemption 2</title>
             <link>https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/</link>
             <pubDate>Fri, 19 Jun 2020 19:15:51 +0300</pubDate>
             
@@ -487,15 +487,18 @@ I will update this article when I got more information. Please, comment, share a
             <pubDate>Fri, 26 Jul 2019 15:15:51 +0300</pubDate>
             
             <guid>https://imgeself.github.io/posts/2019-07-28-raytracer-7-simd-rectangles/</guid>
-            <description>In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers: - Previous scene with 8 spheres: 0.00009 ms/ray - Cornell Box: 0.00132 ms/ray
-We need to optimize rectangle intersection testing.
+            <description>In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now. Let&#39;s look at some numbers:
+ Previous scene with 8 spheres: 0.00009 ms/ray Cornell Box: 0.00132 ms/ray  We need to optimize rectangle intersection testing.
 Don&#39;t do anything more than you need to do I hinted this in the last post. We have to get rid of matrix inverse function in the IntersectWorld function because it&#39;s too heavy.</description>
             <content type="html"><![CDATA[
 
 <p>In the last post, we implemented rectangles and rendered the Cornell Box scene. It was very satisfying but the program is way slow now.
-Let's look at some numbers:
- - Previous scene with 8 spheres: <strong>0.00009 ms/ray</strong>
- - Cornell Box: <strong>0.00132 ms/ray</strong></p>
+Let's look at some numbers:</p>
+
+<ul>
+<li>Previous scene with 8 spheres: <strong>0.00009 ms/ray</strong></li>
+<li>Cornell Box: <strong>0.00132 ms/ray</strong></li>
+</ul>
 
 <p>We need to optimize rectangle intersection testing.</p>
 
