@@ -399,8 +399,8 @@ To solve that, the game renders translucent materials back to front with forward
 </ul>
 
 <blockquote>
-<p>The number of registers used in a shader correlates with the number of shader instances that can be run in parallel.
-Since forward shading combines material and lighting(and shadow) calculations, the number of registers will be high in forward shaders</p>
+<p>The number of registers used in a shader has a negative correlation with the number of shader instances that can be run in parallel.
+Since forward shading combines material and lighting(and shadow) calculations, the number of registers can be high in forward shaders</p>
 </blockquote>
 
 <ul>
