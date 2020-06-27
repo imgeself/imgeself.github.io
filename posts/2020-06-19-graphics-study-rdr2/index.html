@@ -36,7 +36,7 @@
 <meta itemprop="description" content="One of my favorite games of all time, Red Dead Redemption returned with a prequel for consoles in 2018. Then it came for PCs in 2019. I finally managed to play the game and amazed by its graphics immediately. But I got upset because I can barely play the game on medium settings at 25 FPS with a 1050Ti laptop GPU. I know that I don&#39;t have a good rig but 25 FPS on medium settings?">
 <meta itemprop="datePublished" content="2020-06-19T19:15:51&#43;03:00" />
 <meta itemprop="dateModified" content="2020-06-19T19:15:51&#43;03:00" />
-<meta itemprop="wordCount" content="2652">
+<meta itemprop="wordCount" content="2645">
 
 
 
@@ -213,9 +213,8 @@ Baked ambient occlusion helps to darken on a large scale such as darkening in pa
 <p><img src="/img/envao.jpg" alt="EnvironmentMapBakedAO" />
 <em>Environment Cubemap Faces (Baked AO): <code>R8_UNORM</code></em></p>
 
-<p>Even though the game generates a GBuffer, it doesn't render lights the same way as classic <a href="https://en.wikipedia.org/wiki/Deferred_shading" target="_blank">deferred rendering</a>.
-The lighting is done in one single compute pass instead of rendering every light's volume.
-So it's more like a forward rendering without shadows.
+<p>The game uses <a href="https://www.gdcvault.com/play/1023510/Advanced-Graphics-Techniques-Tutorial-Day" target="_blank">tile-based deferred rendering</a> path for calculating the lighting of environment maps.
+The light culling and the lighting are calculated together in one compute pass for each environment map face. (thanks <a href="https://twitter.com/benoitvimont" target="_blank">@benoitvimont</a> for pointing that out)
 The game also uses the &quot;top-down world lightmap&quot; technique, <a href="https://www.gdcvault.com/play/1017710/Rendering-Assassin-s-Creed" target="_blank">similar to Assassin's Creed III</a>, for baked lighting.</p>
 
 <p>For each cubemap face, RDR2 renders the final color on top of the sky environment texture.
@@ -449,7 +448,7 @@ Instead, it generates a spotlight shadow map and copies that shadow map's memory
 
 <p>That explains why they are not using a square sized shadow map for spotlights.
 Pixel count for spotlight shadow and point light texture cubemap should be the same.
-I am sure that you noticed some weird slice pattern in the right image.
+I am sure you noticed some slice pattern in the right image.
 That happens because the width of spot and point light shadow map is different.</p>
 
 <p>Also note that this texture doesn't cover 360 degrees.
@@ -485,7 +484,7 @@ There is some baked lighting from the &quot;top-down world lightmap&quot; mentio
 Lights are rendered back-to-front with additive blending.</p>
 
 <p>For avoiding unnecessary shader invokes, the game uses depth bound testing which is an <a href="https://www.geeks3d.com/20130523/amd-gcn-performance-tweets-and-depth-bounds-test-dx11-demo-published/" target="_blank">extension feature</a> in OpenGL/D3D11 but becomed <a href="https://microsoft.github.io/DirectX-Specs/d3d/DepthBoundsTest.html" target="_blank">native feature</a> in Vulkan/D3D12.
-It also uses stencil testing for discarding pixels that consumed by translucent objects like glasses in windows.
+It also uses stencil testing for discarding pixels that consumed by translucent objects like window glasses.
 Those objects will be rendered at the forward pass.</p>
 
 <p><img src="/img/lightpass2.jpg" alt="LightPass2" /></p>
@@ -600,7 +599,7 @@ I will update this article when I got more information. Please, comment, share a
 
         <div class="post-info">
 
-            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>2652 Words</p>
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>2645 Words</p>
 
             <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2020-06-19 19:15 &#43;0300</p>
         </div>

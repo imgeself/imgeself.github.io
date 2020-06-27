@@ -99,9 +99,8 @@ Baked ambient occlusion helps to darken on a large scale such as darkening in pa
 <p><img src="/img/envao.jpg" alt="EnvironmentMapBakedAO" />
 <em>Environment Cubemap Faces (Baked AO): <code>R8_UNORM</code></em></p>
 
-<p>Even though the game generates a GBuffer, it doesn't render lights the same way as classic <a href="https://en.wikipedia.org/wiki/Deferred_shading" target="_blank">deferred rendering</a>.
-The lighting is done in one single compute pass instead of rendering every light's volume.
-So it's more like a forward rendering without shadows.
+<p>The game uses <a href="https://www.gdcvault.com/play/1023510/Advanced-Graphics-Techniques-Tutorial-Day" target="_blank">tile-based deferred rendering</a> path for calculating the lighting of environment maps.
+The light culling and the lighting are calculated together in one compute pass for each environment map face. (thanks <a href="https://twitter.com/benoitvimont" target="_blank">@benoitvimont</a> for pointing that out)
 The game also uses the &quot;top-down world lightmap&quot; technique, <a href="https://www.gdcvault.com/play/1017710/Rendering-Assassin-s-Creed" target="_blank">similar to Assassin's Creed III</a>, for baked lighting.</p>
 
 <p>For each cubemap face, RDR2 renders the final color on top of the sky environment texture.
@@ -335,7 +334,7 @@ Instead, it generates a spotlight shadow map and copies that shadow map's memory
 
 <p>That explains why they are not using a square sized shadow map for spotlights.
 Pixel count for spotlight shadow and point light texture cubemap should be the same.
-I am sure that you noticed some weird slice pattern in the right image.
+I am sure you noticed some slice pattern in the right image.
 That happens because the width of spot and point light shadow map is different.</p>
 
 <p>Also note that this texture doesn't cover 360 degrees.
@@ -371,7 +370,7 @@ There is some baked lighting from the &quot;top-down world lightmap&quot; mentio
 Lights are rendered back-to-front with additive blending.</p>
 
 <p>For avoiding unnecessary shader invokes, the game uses depth bound testing which is an <a href="https://www.geeks3d.com/20130523/amd-gcn-performance-tweets-and-depth-bounds-test-dx11-demo-published/" target="_blank">extension feature</a> in OpenGL/D3D11 but becomed <a href="https://microsoft.github.io/DirectX-Specs/d3d/DepthBoundsTest.html" target="_blank">native feature</a> in Vulkan/D3D12.
-It also uses stencil testing for discarding pixels that consumed by translucent objects like glasses in windows.
+It also uses stencil testing for discarding pixels that consumed by translucent objects like window glasses.
 Those objects will be rendered at the forward pass.</p>
 
 <p><img src="/img/lightpass2.jpg" alt="LightPass2" /></p>
