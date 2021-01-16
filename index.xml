@@ -6,10 +6,20 @@
     <description>Recent content on Dear World,</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 19 Jun 2020 19:15:51 +0300</lastBuildDate>
+    <lastBuildDate>Sat, 16 Jan 2021 22:06:51 +0300</lastBuildDate>
     
 	<atom:link href="https://imgeself.github.io/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Making a game engine based on Our Machinery blogs</title>
+      <link>https://imgeself.github.io/posts/2021-01-16-imge/</link>
+      <pubDate>Sat, 16 Jan 2021 22:06:51 +0300</pubDate>
+      
+      <guid>https://imgeself.github.io/posts/2021-01-16-imge/</guid>
+      <description>While I was reading Gabriel Sassone&#39;s blog posts about shader systems, I noticed some links that refer to Our Machinery blogs. Then I found out that The Machinery is a new game engine project from the guys behind Bitsquid/Stringray engine.
+I liked the most that they always tell advantages and disadvantages of each decision they make in their blogs. You can smell the experience from each blog. Then I was like: &amp;quot;This is amazing, I should do something like this?</description>
+    </item>
     
     <item>
       <title>Graphics Study: Red Dead Redemption 2</title>
@@ -102,15 +112,6 @@ struct Material { float refractiveIndex; // Refractive index of material. 0 mean
 You can find source code in here.
 Main references for this raytracer are:
  Handmade Ray (Raytracing extension of Handmade Hero) Peter Shirley&#39;s ray tracing books Aras&#39;s amazing blog posts Scratchapixel  First, I wrote BMP image writer and math, vector utils. Then I wrote sphere, plane, world, light structures and basic intersection code. Most raytracer tutorials starts teaching using global illumination and there is a good reason for that.</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>https://imgeself.github.io/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://imgeself.github.io/about/</guid>
-      <description>Hi! I am Hüseyin. I am an engineer who interested in computer graphics, game engines and other things. And this is my about page.</description>
     </item>
     
   </channel>

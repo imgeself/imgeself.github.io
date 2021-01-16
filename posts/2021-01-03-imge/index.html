@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="While I was reading Gabriel Sassone&#39;s blog posts about shader systems, I noticed some links that refer to Our Machinery blogs. Then I found out that The Machinery is a new game engine project from the guys behind Bitsquid/Stringray engine.
+I liked the most that they always tell advantages and disadvantages of each decision they make in their blogs. You can smell the experience from each blog. Then I was like: &amp;quot;This is amazing, I should do something like this?" />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="https://imgeself.github.io/posts/2021-01-03-imge/" />
+
+
+    <title>
+        
+            Making a game engine based on Our Machinery blogs :: Dear World, 
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.3be786f7e7db164c2f02fff303c9f011f026f3df1f61a2ce993b4c5005163bcd.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Making a game engine based on Our Machinery blogs">
+<meta itemprop="description" content="While I was reading Gabriel Sassone&#39;s blog posts about shader systems, I noticed some links that refer to Our Machinery blogs. Then I found out that The Machinery is a new game engine project from the guys behind Bitsquid/Stringray engine.
+I liked the most that they always tell advantages and disadvantages of each decision they make in their blogs. You can smell the experience from each blog. Then I was like: &quot;This is amazing, I should do something like this?">
+<meta itemprop="datePublished" content="2021-01-03T19:15:51&#43;03:00" />
+<meta itemprop="dateModified" content="2021-01-03T19:15:51&#43;03:00" />
+<meta itemprop="wordCount" content="1882">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Making a game engine based on Our Machinery blogs"/>
+<meta name="twitter:description" content="While I was reading Gabriel Sassone&#39;s blog posts about shader systems, I noticed some links that refer to Our Machinery blogs. Then I found out that The Machinery is a new game engine project from the guys behind Bitsquid/Stringray engine.
+I liked the most that they always tell advantages and disadvantages of each decision they make in their blogs. You can smell the experience from each blog. Then I was like: &quot;This is amazing, I should do something like this?"/>
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2021-01-03 19:15:51 &#43;0300 &#43;03" />
+
+
+
+
+
+
+
+
+    </head>
+
+    <body class="dark-theme">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">echo &#34;Dear World,</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://imgeself.github.io/about/">About</a></li><li><a href="https://imgeself.github.io/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle unselectable"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>9 minutes
+
+            
+
+            </p>
+        </div>
+
+        <article>
+            <h1 class="post-title">
+                <a href="https://imgeself.github.io/posts/2021-01-03-imge/">Making a game engine based on Our Machinery blogs</a>
+            </h1>
+
+            
+
+            <div class="post-content">
+                
+
+<p>While I was reading Gabriel Sassone's <a href="https://jorenjoestar.github.io/post/writing_shader_effect_language_2/" target="_blank">blog posts about shader systems</a>, I noticed some links that refer to <a href="https://ourmachinery.com/post/" target="_blank">Our Machinery blogs</a>.
+Then I found out that The Machinery is a new game engine project from the guys behind <a href="http://bitsquid.blogspot.com/" target="_blank">Bitsquid/Stringray</a> engine.</p>
+
+<p>I liked the most that they always tell advantages and disadvantages of each decision they make in their blogs. You can smell the experience from each blog.
+Then I was like: &quot;This is amazing, I should do something like this?&quot;. And I decided to make a game engine project based on ideas from The Machinery blogs.</p>
+
+<p><img src="/img/meme.jpg" alt="" /></p>
+
+<blockquote>
+<p>When I started this project and this blog post, The Machinery was still in closed beta. But not for a long time ago they <a href="https://ourmachinery.com/post/the-machinery-goes-open-beta/" target="_blank">went to open beta</a>. This made this &quot;challenge project&quot; a little easier. Because now I have a second source for inspiration: The Machinery source code. (well... headers only but that's okay)</p>
+</blockquote>
+
+<h1 id="philosopy">Philosopy</h1>
+
+<p>The Machinery is full of good ideas. But the main philosophy is simplicity. All of the ideas around it have based on that principle.
+They are using C instead of a different complicated language. They are writing easy to configure, hackable code instead of a black box system.
+I decided to go with C++ because I want some of its features. But I will be using their C based API style.</p>
+
+<h1 id="plugin-system">Plugin system</h1>
+
+<p>One of the major features of The Machinery is <a href="https://ourmachinery.com/post/little-machines-working-together-part-1/" target="_blank">its plugin system</a>. That is where the name came from. Little plugins work together and bring life to a much more complex thing. Each plugin is a shared library that can be loaded at runtime. This isn't a new thing for game engines, most of them are using shared libraries for <a href="https://ourmachinery.com/post/dll-hot-reloading-in-theory-and-practice/" target="_blank">code hot-reloading</a>, bring down compile times, etc. But they are generally limited. The common use case is that game code is a shared library and if you change anything in game code, you can instantly load the shared library and see its result instantly. In The Machinery case, every system is a shared library/plugin. Not only game code but you can change something in the engine code and hot-reload it.</p>
+
+<p>I implemented something similar to the system they described in their blog posts. Each system is a plugin and a system called <strong>APIRegistry</strong> is responsible for loading, registering plugins. APIRegistry is a much more complex thing in The Machinery, I implemented a <a href="https://github.com/imgeself/imge/blob/main/platform/src/ApiRegistry.h" target="_blank">very basic version of it</a>.</p>
+
+<h2 id="dll-hotreloading-and-clangcl">DLL Hotreloading and ClangCL</h2>
+
+<p>Implementing a hot-reload DLL system on Windows is unnecessarily <a href="https://ourmachinery.com/post/little-machines-working-together-part-2/#windows-woes" target="_blank">complicated</a>.
+For that I decided to use <a href="https://llvm.org/devmtg/2014-04/PDFs/Talks/clang-cl.pdf" target="_blank">ClangCL</a> in this project. It is the MSVC compatible clang compiler. It works well with Visual Studio, MSBuild, etc. You can download ClangCL from Visual Studio Installer.</p>
+
+<p>The first problem I encounter is that premake's ClangCL support for vs2019 doesn't work. I <a href="https://github.com/premake/premake-core/issues/1507" target="_blank">opened an issue</a> in their GitHub and it got solved but it hasn't been released yet. If you are using the Alpha 15 or lower version, you can get ClangCL support by setting <code>toolset</code> to <code>msc-ClangCL</code>.</p>
+
+<p>I can tell you this: If you planning to implement DLL hot-reloading you have to use ClangCL. It solves most of the bullshit you have to deal with when using MSVC. With ClangCL, there is no PDB locking. You can override the PDB file without detaching and reattaching the debugger. (I'm not %100 sure how it does this but I think it creates temp PDB files for old PDB and unlocks the actual PDB) You don't have to deal with random PDB names and other kinds of stupid work.</p>
+
+<p>I wasn't sure how the Visual Studio debugger will react to this type of behavior but it works like a charm. It loads the DLL and the PDB correctly and breakpoints work after a hot-reload. But I can't say the same for the VSCode debugger. It works when you first hit a breakpoint, but after hot-reload breakpoints don't work anymore. I <a href="https://github.com/microsoft/vscode-cpptools/issues/6245" target="_blank">opened an issue</a> for this problem too but it is still under investigation. (or forgotten)</p>
+
+<p>There are some things that haven't been mentioned in Our Machinery blogs. One of them is plugin dependency. Some plugins need other plugins to work but The Machinery scans a plugin directory and loads all the DLLs. This means that plugins can be loaded in any order. When I got my hands on source code (headers actually) the documentation said this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#75715e">// Calling `get()` on an API that hasn&#39;t been loaded yet will return a struct of NULL function
+</span><span style="color:#75715e">// pointers. When the API is loaded (and calls `set()`), these NULL pointers will be replaced by
+</span><span style="color:#75715e">// the real function pointers of the API.
+</span><span style="color:#75715e">//
+</span><span style="color:#75715e">// To test whether an API has been loaded, you can test if it contains NULL function pointers or
+</span><span style="color:#75715e">// not.
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>(<span style="color:#f92672">*</span>get)(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span>name);</code></pre></div>
+<p>It returns a valid pointer that points a struct of null function pointers. But I'm not sure how how the APIRegistry knows requested API struct size before registering.</p>
+
+<h1 id="phsical-design">Phsical design</h1>
+
+<p>I think the boldest move in The Machinery is <a href="https://ourmachinery.com/post/physical-design/" target="_blank">their physical design</a> which is just a rule essentially:</p>
+
+<p><strong>Header files cannot include other header files. (except some basic type defining headers)</strong></p>
+
+<p>This looks infeasible at first glance. How can I use some other class/struct from other headers in a header if I can't include it? Well, the answer is simple apparently: pointers.</p>
+
+<p>Compilers need some information (size, etc.) about structs when they are used in function arguments or other structs as a member. But if you use that struct as a pointer then the compiler doesn't need to know its size because pointer size is fixed. You can get away by just declaring the type, not including its header. This is called <a href="https://en.wikipedia.org/wiki/Forward_declaration" target="_blank">forward declaration</a>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-C" data-lang="C"><span style="color:#66d9ef">struct</span> SomeType;
+
+<span style="color:#66d9ef">struct</span> SomeAPI
+{
+    <span style="color:#66d9ef">void</span> SomeFunction(SomeType<span style="color:#f92672">*</span> object);
+};</code></pre></div>
+<p><a href="https://ourmachinery.com/post/physical-design/" target="_blank">In their blog</a>, they talk about some of the drawbacks of this design. It makes it hard to use templates, inline functions, etc.
+For that, they use <code>.inl</code> files.</p>
+
+<p><strong>.inl files are header files that can include other headers.</strong></p>
+
+<p>While they are being used very sparingly, I feel like this is still cheating. So, I came up with a different solution.
+I decided to use precompiled header for templates and inline functions. Since there is a rule that you have to include the precompiled header first,
+we can put our type definitions there too. And the rule becomes like this:</p>
+
+<p><strong>Header files cannot include other header files. (even some basic type defining headers)</strong></p>
+
+<p>You can put all of your templated structs, atomics, intrinsics, math functions and other things to be inlined into the precompiled header.
+And you can also leverage pch for build speed, you can put your big-boi headers there.</p>
+
+<p>To be able to do that, we need a shared precompiled header for all of our plugins. This shouldn't be that hard right? Well, yes but not with MSVC.
+Because it requires copying PDB and IDB files of pch, otherwise MSBuild deletes the <code>.pch</code> file for some reason. They posted a <a href="https://devblogs.microsoft.com/cppblog/shared-pch-usage-sample-in-visual-studio/" target="_blank">blog post</a> about how to implement shared pch with MSVC. This is the reason why I switched to ClangCL, I'm tired of dealing with MSVC bullshit.</p>
+
+<p>One small note for shared pch is that premake doesn't have a way to set the pchpath like <code>symbolspath</code>. But you can use overriding for this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#f92672">//</span> Set all of the project<span style="color:#e6db74">&#39;s pch path to same pch
+</span><span style="color:#e6db74">if _ACTION:startswith(&#34;vs&#34;) then
+</span><span style="color:#e6db74">    require(&#34;vstudio&#34;)
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    local function precompiledHeaderOutputFile(prj)
+</span><span style="color:#e6db74">        premake.w(&#39;</span><span style="color:#f92672">&lt;</span>PrecompiledHeaderOutputFile<span style="color:#f92672">&gt;</span><span style="color:#960050;background-color:#1e0010">$</span>(OutDir)sharedpch.pch<span style="color:#f92672">&lt;/</span>PrecompiledHeaderOutputFile<span style="color:#f92672">&gt;</span><span style="color:#e6db74">&#39;)
+</span><span style="color:#e6db74">    end
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    premake.override(premake.vstudio.vc2010.elements, &#34;clCompile&#34;, function(base, prj)
+</span><span style="color:#e6db74">        local calls = base(prj)
+</span><span style="color:#e6db74">        table.insert(calls, precompiledHeaderOutputFile)
+</span><span style="color:#e6db74">        return calls
+</span><span style="color:#e6db74">    end)
+</span><span style="color:#e6db74">end</span></code></pre></div>
+<p>With this shared pch implementation, I can create headers that don't include any headers without any exception. But it has an obvious drawback: If you change anything in the pch, it will trigger a full rebuild of your entire project. But I decided to use it anyway. As long as we don't change the precompiled header too often, we are good.</p>
+
+<h1 id="memory-allocation">Memory allocation</h1>
+
+<p>There isn't an Our Machinery blog dedicated to memory allocation but they have amazing blogs about <a href="https://ourmachinery.com/post/minimalist-container-library-in-c-part-1/" target="_blank">containers</a> and <a href="https://ourmachinery.com/post/data-structures-part-1-bulk-data/" target="_blank">data structures</a>.
+In this project, I decided to implement my own allocators and containers and not use STL.
+Then I read this <a href="https://ourmachinery.com/post/virtual-memory-tricks/" target="_blank">virtual memory blog</a> and implemented a linear allocator with the technique described in the post:
+Reserve a big memory from 64bit address space and commit when you need memory. (duh)
+My implementation of dynamic array and hash table uses this linear allocator.</p>
+
+<p>Generally, dynamic array implementation's push_back methods take amortized constant time. Because it needs to relocate its contents when it needs to grow.
+With this implementation, push_back takes constant time. Because there is no relocation, you just commit more memory from reserved address space.</p>
+
+<h1 id="ecs">ECS</h1>
+
+<p>Again, there isn't a blog dedicated to ECS but I know they are using an archetype-based implementation similar to Unity where you store the same type of entities together. (I know this because I asked this to Niklas)</p>
+
+<p>One difference is that, the systems that run on entities that have certain components called <strong>&quot;engine&quot;</strong>. <strong>&quot;System&quot;</strong> is a system that runs on all entities. So there is no component filtering and other kinds of things in <strong>&quot;system&quot;</strong>.
+I went with a similar direction and <a href="https://github.com/imgeself/imge/blob/main/ecs/src/ecs.h" target="_blank">implemented</a> almost the same API for ECS. But I didn't implement <strong>&quot;system&quot;</strong>, only <strong>&quot;engine&quot;</strong>.</p>
+
+<h1 id="imgui">Imgui</h1>
+
+<p>Like every hobby game engine project, I wanted to integrate Dear Imgui into this project.
+In The Machinery they have <a href="https://www.youtube.com/watch?v=yYq_dviv1B0" target="_blank">custom imgui implementation</a> but I didn't want to implement one.
+While I was trying to integrate, I realized one of the major drawbacks of The Machinery's general design: It is hard to integrate external systems into this architecture.</p>
+
+<p>First, I decided to integrate Dear Imgui as a static library. But if you do that you cannot leverage the plugin system architecture.
+Then I decided to make it a plugin/DLL. But in this architecture every plugin loaded at runtime, there is no static linking. So, I had to make a wrapper function for every imgui function and put them into an <a href="https://github.com/imgeself/imge/blob/main/imgui/src/imgui_api.h" target="_blank">ImguiAPI</a> struct which will be registered through APIRegistry. I don't like this method either but I went with this route.</p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>There are tons of things that waiting to be implemented such as proper <a href="https://ourmachinery.com/post/a-modern-rendering-architecture/" target="_blank">renderer API</a>,
+<a href="https://ourmachinery.com/post/high-level-rendering-using-render-graphs/" target="_blank">render graph</a> and <a href="https://ourmachinery.com/post/the-machinery-shader-system-part-1/" target="_blank">shader system</a> for rendering,
+<a href="https://ourmachinery.com/post/fiber-based-job-system/" target="_blank">fiber-based multithreading</a>, and their secret weapon <a href="https://ourmachinery.com/post/creation-graphs/" target="_blank">creation graphs</a>.
+But this is a small foundation that I will be implementing other systems on top of it.
+Here are my conclusions about this &quot;challenge project&quot; so far:</p>
+
+<ul>
+<li><p>You should use ClangCL on windows if you planning to implement DLL hot-reload without headaches. It solves most of the stupid things coming from CL.
+But tooling can be problematic when using ClangCL. Be aware of it.</p></li>
+
+<li><p>As I mentioned previously, I find that it's hard to integrate an external system into this architecture. Maybe they will make a blog post about it.</p></li>
+
+<li><p>This C based architecture is wildly type-unsafe. Both ECS and APIRegistry systems use names for looking up components or API structs. Maybe I try some of the C++ type stuff for identifying components and make it a little more typesafe.</p></li>
+</ul>
+
+<p>I'm not sure this blog gives insights or just a time waste. But I am enthusiastic about The Machinery and wanted to share my thoughts.
+It is very exciting that The Machinery is in open beta now and more people can use it. I hope you enjoyed it.</p>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1882 Words</p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2021-01-03 19:15 &#43;0300</p>
+        </div>
+
+        
+            <div class="pagination">
+                <div class="pagination__title">
+                    <span class="pagination__title-h"></span>
+                    <hr />
+                </div>
+
+                <div class="pagination__buttons">
+                    
+
+                    
+                        <span class="button next">
+                            <a href="https://imgeself.github.io/posts/2020-06-19-graphics-study-rdr2/">
+                                <span class="button__text">Graphics Study: Red Dead Redemption 2</span>
+                                <span class="button__icon">→</span>
+                            </a>
+                        </span>
+                    
+                </div>
+            </div>
+        
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+            
+            <span> <a href="https://imgeself.github.io/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="/bundle.min.dc716e9092c9820b77f96da294d0120aeeb189b5bcea9752309ebea27fd53bbe6b13cffb2aca8ecf32525647ceb7001f76091de4199ac5a3caa432c070247f5b.js" integrity="sha512-3HFukJLJggt3&#43;W2ilNASCu6xibW86pdSMJ6&#43;on/VO75rE8/7KsqOzzJSVkfOtwAfdgkd5BmaxaPKpDLAcCR/Ww=="></script>
+
+
+
+    </body>
+</html>
