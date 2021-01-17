@@ -38,7 +38,7 @@ I liked the most that they always tell advantages and disadvantages of each deci
 I liked the most that they always tell advantages and disadvantages of each decision they make in their blogs. You can smell the experience from each blog. Then I was like: &quot;This is amazing, I should do something like this?">
 <meta itemprop="datePublished" content="2021-01-16T22:06:51&#43;03:00" />
 <meta itemprop="dateModified" content="2021-01-16T22:06:51&#43;03:00" />
-<meta itemprop="wordCount" content="1882">
+<meta itemprop="wordCount" content="1881">
 
 
 
@@ -212,7 +212,7 @@ And you can also leverage pch for build speed, you can put your big-boi headers 
 Because it requires copying PDB and IDB files of pch, otherwise MSBuild deletes the <code>.pch</code> file for some reason. They posted a <a href="https://devblogs.microsoft.com/cppblog/shared-pch-usage-sample-in-visual-studio/" target="_blank">blog post</a> about how to implement shared pch with MSVC. This is the reason why I switched to ClangCL, I'm tired of dealing with MSVC bullshit.</p>
 
 <p>One small note for shared pch is that premake doesn't have a way to set the pchpath like <code>symbolspath</code>. But you can use overriding for this:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#f92672">//</span> Set all of the project<span style="color:#e6db74">&#39;s pch path to same pch
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#f92672">//</span> Set all project<span style="color:#e6db74">&#39;s pch path to same pch path
 </span><span style="color:#e6db74">if _ACTION:startswith(&#34;vs&#34;) then
 </span><span style="color:#e6db74">    require(&#34;vstudio&#34;)
 </span><span style="color:#e6db74">
@@ -282,7 +282,7 @@ It is very exciting that The Machinery is in open beta now and more people can u
 
         <div class="post-info">
 
-            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1882 Words</p>
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1881 Words</p>
 
             <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2021-01-16 22:06 &#43;0300</p>
         </div>

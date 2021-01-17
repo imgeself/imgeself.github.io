@@ -96,7 +96,7 @@ And you can also leverage pch for build speed, you can put your big-boi headers 
 Because it requires copying PDB and IDB files of pch, otherwise MSBuild deletes the <code>.pch</code> file for some reason. They posted a <a href="https://devblogs.microsoft.com/cppblog/shared-pch-usage-sample-in-visual-studio/" target="_blank">blog post</a> about how to implement shared pch with MSVC. This is the reason why I switched to ClangCL, I'm tired of dealing with MSVC bullshit.</p>
 
 <p>One small note for shared pch is that premake doesn't have a way to set the pchpath like <code>symbolspath</code>. But you can use overriding for this:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#f92672">//</span> Set all of the project<span style="color:#e6db74">&#39;s pch path to same pch
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#f92672">//</span> Set all project<span style="color:#e6db74">&#39;s pch path to same pch path
 </span><span style="color:#e6db74">if _ACTION:startswith(&#34;vs&#34;) then
 </span><span style="color:#e6db74">    require(&#34;vstudio&#34;)
 </span><span style="color:#e6db74">
